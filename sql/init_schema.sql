@@ -21,7 +21,7 @@ CREATE TABLE `area` (
   `name` varchar(45) NOT NULL COMMENT '名称',
   `path` varchar(45) NOT NULL COMMENT '父节点字符串',
   `last_mod_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `city_id` int(10) unsigned NOT NULL COMMENT '所属城市id',
+  `city_id` varchar(6) unsigned NOT NULL COMMENT '所属城市id',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='区域表';
 
@@ -37,7 +37,7 @@ DROP TABLE IF EXISTS `issue`;
 
 CREATE TABLE `issue` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增编号',
-  `city_id` int(10) unsigned NOT NULL COMMENT '所属城市id',
+  `city_id` varchar(6) unsigned NOT NULL COMMENT '所属城市id',
   `area1` varchar(45) NOT NULL COMMENT '区域',
   `area2` varchar(45) NOT NULL COMMENT '类别',
   `area3` varchar(45) NOT NULL COMMENT '路/街',
@@ -145,7 +145,7 @@ CREATE TABLE `target` (
   `code` varchar(45) DEFAULT NULL COMMENT '指标代码',
   `name` varchar(45) NOT NULL COMMENT '指标名称',
   `path` varchar(45) NOT NULL COMMENT '父节点字符串',
-  `city_id` int(10) unsigned NOT NULL COMMENT '所属城市id',
+  `city_id` varchar(6) unsigned NOT NULL COMMENT '所属城市id',
   `last_mod_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='指标代码表';
@@ -165,7 +165,7 @@ CREATE TABLE `user` (
   `username` varchar(45) NOT NULL COMMENT '用户名',
   `smartphone` varchar(15) NOT NULL COMMENT '手机号',
   `password` varchar(45) NOT NULL COMMENT '密文密码',
-  `city_id` int(10) unsigned NOT NULL COMMENT '所属城市id',
+  `city_id` varchar(6) unsigned NOT NULL COMMENT '所属城市id',
   `user_type_id` tinyint(3) unsigned NOT NULL DEFAULT '1' COMMENT '用户类型',
   `area` text COMMENT '区域权限',
   `target` text COMMENT '指标权限',
