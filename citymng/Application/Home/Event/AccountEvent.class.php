@@ -1,0 +1,1 @@
+<?phpnamespace Home\Event;use Think\Controller;class AccountEvent extends Controller {		public function auth($username, $password) {		$cond = array(			'username' => $username,			'password' => md5encode($password)		);		$user = M('user')->where($cond)->find();		if (!empty($user)) {			return $user;		}		return false;	}}
