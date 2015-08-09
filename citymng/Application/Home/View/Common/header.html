@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh" xml:lang="zh">
+<head>
+<title>{$title}</title>
+<base href="" />
+<meta content="text/html; charset=utf-8" http-equiv="content-type" />
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/stylesheet/style.css" />
+<script type="text/javascript" src="__PUBLIC__/javascript/jquery/jquery.min.js"></script>
+
+<link rel="stylesheet" href="__PUBLIC__/javascript/jquery/jquery-easyui-1.4.2/themes/icon.css" />
+<link rel="stylesheet" href="__PUBLIC__/javascript/jquery/jquery-easyui-1.4.2/themes/default/easyui.css" />
+<script type="text/javascript" src="__PUBLIC__/javascript/jquery/jquery-easyui-1.4.2/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/javascript/jquery/jquery-easyui-1.4.2/locale/easyui-lang-zh_CN.js"></script>
+
+<script type="text/javascript" src="__PUBLIC__/javascript/jquery/browser.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+
+});
+ 
+function getURLVar(urlVarName) {
+	var urlHalves = String(document.location).toLowerCase().split('?');
+	var urlVarValue = '';
+	
+	if (urlHalves[1]) {
+		var urlVars = urlHalves[1].split('&');
+
+		for (var i = 0; i <= (urlVars.length); i++) {
+			if (urlVars[i]) {
+				var urlVarPair = urlVars[i].split('=');
+				
+				if (urlVarPair[0] && urlVarPair[0] == urlVarName.toLowerCase()) {
+					urlVarValue = urlVarPair[1];
+				}
+			}
+		}
+	}
+	
+	return urlVarValue;
+} 
+
+</script>
+</head>
+<body>
+<div id="container">
+	<div id="top">
+		<div class="top_left">
+		<marquee width="600px" height="28px" direction="left" scrollamount="3"           onmouseover="this.stop()" onmouseout="this.start()">
+					公告：<span style="color:red">本网站正在开发中，敬请期待。</span>
+				</marquee>
+		</div>
+		<div class="top_right">
+			欢迎您，<span style="color:red;">张三</span> <span class="top_cont2"><a href="#">退出</a> | <a href="#">修改密码</a></span>
+		</div>
+	</div>
+	<div id="header">
+		<div class="header_title">数字综合管理平台</div>
+		<div class="nav">
+			<ul>
+				<li><a href="#">问题管理</a></li>
+				<li><a href="#">区域维护</a></li>
+				<li><a href="#">代码指标维护</a></li>
+			</ul>
+		</div>
+	</div>
+	<div id="content">
+		<!--<div id="notice">
+			<div>
+				<marquee width="800px" height="28px" direction="left" scrollamount="3"           onmouseover="this.stop()" onmouseout="this.start()">
+					本网站正在开发中，敬请期待。
+				</marquee>
+			</div>
+		</div>-->
+		<div class="breadcrumb">
+			当前位置：
+			<a href="#">{$title}</a>
+		</div>

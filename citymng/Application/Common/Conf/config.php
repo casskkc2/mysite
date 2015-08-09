@@ -7,4 +7,7 @@ return array(
 	'DB_PWD'    => '', 
 	'DB_PORT'   => 3306,
 	'DB_PREFIX' => '',
+	
+	'TMPL_ACTION_ERROR' 	=> 'Home@Common:error',
+	'TMPL_ACTION_SUCCESS'	=> 'Home@Common:error',
 );

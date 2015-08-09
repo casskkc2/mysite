@@ -60,5 +60,13 @@ class PublicController extends BaseController {
 			exit(json_encode($json));
 		}
 	}
+	
+	public function detectLogin() {
+		if (!session('?user') || !session('?city')) {
+			session('user', null);
+			session('city', null);
+			$this->redirect('Home/Public/index');
+		}
+	}
 
 }

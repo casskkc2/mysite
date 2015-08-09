@@ -137,11 +137,25 @@ label {
 	float:left;
 }
 
-table.form {
+table.form, table.form2 {
     border-collapse: collapse;
     margin-bottom: 20px;
     width: 100%;
 }
+
+table.form2 > tbody > tr > td:first-child {
+    width: 200px;
+}
+table.form2 > tbody > tr > td {
+    /*border-bottom: 1px dotted #cccccc;*/
+    color: #000000;
+    padding: 10px;
+}
+
+label.error {
+	margin-left:10px;
+}
+.error { color: red;}
 
 table.detail {
 	background: #000;
