@@ -1,0 +1,176 @@
+<include file="Common/header" />
+		<div class="box">
+			<div class="content" style="width:999px">
+				<table class="form">
+					<tbody><tr>
+					  <td align="left" style="width:350px;">选择城市：
+						<select id="province">
+							<volist name="provinces" id="vo">
+							<option value="{$vo.province_id}" <if condition="$vo.province_id eq $sel_city['province_id']"> selected</if>>{$vo.province}</option>
+							</volist>
+						</select>
+						<select id="city">
+						</select>
+					  </td>
+					  <td align="left">
+					  <a id="btn_change_city" class="button">确定</a> 
+					  </td>
+					</tr>
+				  </tbody>
+				 </table>
+				<div class="tab">当前城市：<span id="current_city">{$sel_city.city}</span></div>
+				<div class="tab">
+					<input type="button" id="btn_new" value="新增" /> <input type="button" id="btn_edit" value="编辑" /> <input type="button" id="btn_delete" value="删除" />
+				</div>
+				<div style="border-top: 1px solid #ccc;">
+				<div style="width:350px;height:600px;overflow-y: scroll;float:left;">
+					<ul id="tree"></ul>
+					<!--
+							    <ul id="tt" class="easyui-tree">
+									<li>
+										<span>Folder</span>
+										<ul>
+											<li>
+												<span>Sub Folder 1</span>
+												<ul>
+													<li><span><a href="#">File 11</a></span></li>
+													<li><span>File 12</span></li>
+													<li><span>File 13</span></li>
+												</ul>
+											</li>
+											<li><span>File 2</span></li>
+											<li><span>File 3</span></li>
+										</ul>
+									</li>
+									<li><span>File21</span></li>
+								</ul>
+					-->
+				</div>
+				<div style="width:350px;float:left;margin-left:50px;">
+					<table class="form2">
+					<tbody>
+						<tr>
+							<td align="right">名称：</td>
+							<td><input type="text" id="name" /></td>
+						</tr>
+						<tr>
+							<td align="right">排序：</td>
+							<td><input type="text" id="sort" /></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td>
+								<input type="hidden" id="id" value="" />
+								<a class="button" id="btn_submit">新增</a>
+							</td>
+						</tr>
+					</tbody>
+					</table>
+				</div>
+				</div>
+			</div>
+
+		</div>
+		<script type="text/javascript">
+			var sel_city_id = "{$sel_city.city_id}";
+			var sel_province_id = "{$sel_city.province_id}";
+			$(function() {
+				$("#province").on('change', function() {
+					sel_province_id = $("#province").val();
+					getCityList(sel_province_id, sel_city_id);
+				}).change();
+				
+				$("#btn_change_city").on('click', function() {
+					sel_city_id = $("#city").val();
+					$("#current_city").html($("#city option:selected").text());
+					loadTree(sel_city_id);
+				});
+				
+				$("#btn_new").on('click', function() {
+					getMaxSortNum(ROOT + '/Area/getMaxSortNum', sel_city_id, function(n) {
+						resetForm();
+						$("#sort").val(n);
+					});
+				});
+				
+				$("#btn_edit").on('click', function() {
+					var node = $("#tree").tree("getSelected");
+					if (node == null) {
+						alert("请选择要修改的节点"); return false;
+					}
+					
+					getNodeInfo(ROOT + '/Area/getNode', node.id, function(info) {
+						$("#id").val(info.id);
+						$("#name").val(info.name);
+						$("#sort").val(info.sort);
+						$("#btn_submit").html('修改');
+					});
+				});
+				
+				$("#btn_delete").on("click", function() {
+					var node = $("#tree").tree("getSelected");
+					if (node == null) {
+						alert("请选择要删除的节点"); return false;
+					}
+					
+					checkNodeDeletable(ROOT + '/Area/checkNodeDeletable', node.id, function(err) {
+						if (err != '') {
+							alert(err);
+							return false;
+						}
+						
+						deleteNode(ROOT + '/Area/deleteNode', node.id, function(err) {
+							if (err != '') {
+								alert(err);
+								return false;
+							}
+							$("#tree").tree("remove", node.target);
+						});
+					});
+				});
+				
+				$("#btn_submit").on("click", function() {
+					var node = $("#tree").tree("getSelected");
+					var id = $("#id").val();
+					var data = {
+						id: id,
+						name: $("#name").val(),
+						sort: $("#sort").val(),
+						pid: node ? node.id : 0,
+						city_id: sel_city_id
+					};
+					editNode(ROOT + '/Area/editNode', data, function(res) {
+						if (id > 0) {
+							$("#tree").tree('update', {
+								target: node.target,
+								text: res.name
+							});
+						}else {
+							$("#tree").tree("append", {
+								parent: node ? node.target : null,
+								data: [{
+									id: res.id,
+									text: res.name
+								}]
+							});
+							$("#btn_new").click();
+						}
+					});
+				});
+			});
+			
+			function loadTree(city_id) {
+				$("#tree").tree({
+					url: ROOT + '/Area/getTree',
+					queryParams: {city_id: sel_city_id}
+				});
+			}
+			
+			function resetForm() {
+				$("#id").val(0);
+				$("#name").val('');
+				$("#sort").val('');
+				$("#btn_submit").html('新增');
+			}
+		</script>
+<include file="Common/footer" />
