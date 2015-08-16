@@ -1,7 +1,7 @@
 <?php
 namespace Home\Controller;
 use Think\Controller;
-class AreaController extends GlobalController {
+class TargetController extends GlobalController {
     public function index(){
 		$AreaEvent = A('Area', 'Event');
 		
@@ -9,22 +9,10 @@ class AreaController extends GlobalController {
 		$this->assign('provinces', $provinces);
 		
 		$this->assign('sel_city', $this->city);
-		$this->assign('title', '区域管理');
+		$this->assign('title', '指标代码管理');
 		
 		$this->display();
     }
-	
-	public function getCityList() {
-		$province_id = I('post.province_id');
-		$sel_city_id = I('post.sel_city_id');
-		
-		$AreaEvent = A('Area', 'Event');
-		$city_list = $AreaEvent->getCityList($province_id);
-		
-		$this->assign('city_list', $city_list);
-		$this->assign('sel_city_id', $sel_city_id);
-		$this->display();
-	}
 	
 	public function getTree() {
 		$res = array();
@@ -35,7 +23,7 @@ class AreaController extends GlobalController {
 		}
 		
 		$cond = array('city_id'=>$city_id);
-		$list = M('Area')->where($cond)->order('path, sort')->select();
+		$list = M('Target')->where($cond)->order('path, sort')->select();
 		$res = buildTree($list);
 		
 		$this->ajaxReturn($res);
@@ -48,7 +36,7 @@ class AreaController extends GlobalController {
 			$this->ajaxReturn($res);
 		}
 		$cond = array('city_id'=>$city_id);
-		$sort = M('Area')->where($cond)->max('sort');
+		$sort = M('Target')->where($cond)->max('sort');
 		$res['sort'] = $sort + 1;
 		$this->ajaxReturn($res);
 	}
@@ -61,7 +49,7 @@ class AreaController extends GlobalController {
 			$this->ajaxReturn($res);
 		}
 		$cond = array('id'=>$id);
-		$res = M('Area')->where($cond)->find();
+		$res = M('Target')->where($cond)->find();
 		$this->ajaxReturn($res);
 	}
 	
@@ -74,7 +62,7 @@ class AreaController extends GlobalController {
 			$this->ajaxReturn($res);
 		}
 		$cond = array('path'=>array('like', '%,' . $id . ',%'));
-		$count = M('Area')->where($cond)->count();
+		$count = M('Target')->where($cond)->count();
 		if ($count > 0) {
 			$res['error'] = '该节点下有子节点，不能删除';
 			$this->ajaxReturn($res);
@@ -99,7 +87,7 @@ class AreaController extends GlobalController {
 		}
 		
 		$cond = array('id'=>$id);
-		$stat = M('Area')->where($cond)->delete();
+		$stat = M('Target')->where($cond)->delete();
 		if (false === $stat) {
 			$res['error'] = '删除失败';
 			$this->ajaxReturn($res);
@@ -114,16 +102,17 @@ class AreaController extends GlobalController {
 		$id = I('post.id');
 		$data['name'] = I('post.name');
 		$data['sort'] = I('post.sort');
+		$data['code'] = I('post.code');
 		if ($id == 0) {
 			$data['city_id'] = I('post.city_id');
 			$pid = I('post.pid');
 			if ($pid == 0) {
 				$data['path'] = ',0,';
 			}else {
-				$parent = M('Area')->where(array('id'=>$pid))->find();
+				$parent = M('Target')->where(array('id'=>$pid))->find();
 				$data['path'] = $parent['path'] . $pid . ',';
 			}
-			$new_id = M('Area')->data($data)->add();
+			$new_id = M('Target')->data($data)->add();
 			if ($new_id > 0) {
 				$res['data'] = $data;
 				$res['data']['id'] = $new_id;
@@ -131,7 +120,7 @@ class AreaController extends GlobalController {
 				$res['error'] = '添加失败';
 			}
 		}else {
-			$stat = M('Area')->where(array('id'=>$id))->data($data)->save();
+			$stat = M('Target')->where(array('id'=>$id))->data($data)->save();
 			if (false === $stat) {
 				$res['error'] = '编辑失败';
 			}else {

@@ -50,12 +50,16 @@
 					<table class="form2">
 					<tbody>
 						<tr>
-							<td align="right">名称：</td>
+							<td align="right">指标名称：</td>
 							<td><input type="text" id="name" /></td>
 						</tr>
 						<tr>
 							<td align="right">排序：</td>
 							<td><input type="text" id="sort" /></td>
+						</tr>
+						<tr>
+							<td align="right">代码：</td>
+							<td><input type="text" id="code" /></td>
 						</tr>
 						<tr>
 							<td></td>
@@ -87,7 +91,7 @@
 				});
 				
 				$("#btn_new").on('click', function() {
-					getMaxSortNum(ROOT + '/Area/getMaxSortNum', sel_city_id, function(n) {
+					getMaxSortNum(ROOT + '/Target/getMaxSortNum', sel_city_id, function(n) {
 						resetForm();
 						$("#sort").val(n);
 					});
@@ -99,10 +103,11 @@
 						alert("请选择要修改的节点"); return false;
 					}
 					
-					getNodeInfo(ROOT + '/Area/getNode', node.id, function(info) {
+					getNodeInfo(ROOT + '/Target/getNode', node.id, function(info) {
 						$("#id").val(info.id);
 						$("#name").val(info.name);
 						$("#sort").val(info.sort);
+						$("#code").val(info.code);
 						$("#btn_submit").html('修改');
 					});
 				});
@@ -115,13 +120,13 @@
 					
 					if(!confirm("删除后不可恢复，确定要删除节点：[" + node.text + "] 吗?")) return false;
 					
-					checkNodeDeletable(ROOT + '/Area/checkNodeDeletable', node.id, function(err) {
+					checkNodeDeletable(ROOT + '/Target/checkNodeDeletable', node.id, function(err) {
 						if (err != '') {
 							alert(err);
 							return false;
 						}
 						
-						deleteNode(ROOT + '/Area/deleteNode', node.id, function(err) {
+						deleteNode(ROOT + '/Target/deleteNode', node.id, function(err) {
 							if (err != '') {
 								alert(err);
 								return false;
@@ -138,10 +143,11 @@
 						id: id,
 						name: $("#name").val(),
 						sort: $("#sort").val(),
+						code: $("#code").val(),
 						pid: node ? node.id : 0,
 						city_id: sel_city_id
 					};
-					editNode(ROOT + '/Area/editNode', data, function(res) {
+					editNode(ROOT + '/Target/editNode', data, function(res) {
 						if (id > 0) {
 							alert("修改成功");
 							resetForm();
@@ -166,7 +172,7 @@
 			
 			function loadTree(city_id) {
 				$("#tree").tree({
-					url: ROOT + '/Area/getTree',
+					url: ROOT + '/Target/getTree',
 					queryParams: {city_id: sel_city_id}
 				});
 			}
@@ -175,6 +181,7 @@
 				$("#id").val(0);
 				$("#name").val('');
 				$("#sort").val('');
+				$("#code").val('');
 				$("#btn_submit").html('新增');
 			}
 			
