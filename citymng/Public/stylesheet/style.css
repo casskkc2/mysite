@@ -147,7 +147,7 @@ table.form2 > tbody > tr > td:first-child {
     width: 200px;
 }
 table.form2 > tbody > tr > td {
-    /*border-bottom: 1px dotted #cccccc;*/
+    border-bottom: 1px dotted #cccccc;
     color: #000000;
     padding: 10px;
 }

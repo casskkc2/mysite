@@ -1,7 +1,7 @@
 <?php
 namespace Home\Controller;
 use Think\Controller;
-class GlobalController extends Controller {
+class GlobalController extends BaseController {
 	protected $user;
 	protected $city;
 	protected $userName;

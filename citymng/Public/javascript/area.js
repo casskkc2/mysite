@@ -1,4 +1,5 @@
-function getCityList(province_id, sel_city_id) {
+function getCityList(province_id, sel_city_id, callback) {
+	var callback = callback || function() {};
 	var data = {};
 	data.province_id = province_id;
 	data.sel_city_id = sel_city_id;
@@ -9,6 +10,7 @@ function getCityList(province_id, sel_city_id) {
 		dataType: 'html',
 		success: function(html) {
 			$("#city").html(html);
+			callback();
 		},
 		error: function(xhr, ajaxOptions, thrownError) {
 			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);

@@ -1,0 +1,103 @@
+<include file="Common/header" />
+		<div class="box">
+			<div class="content" style="width:715px">
+				<div class="tab" style="text-align:right;">
+					 <a onclick="$('#export_filter').toggle();"><u>导出登录记录</u></a>
+				 </div>
+				<table class="form" id="export_filter" style="display:none;">
+					<tbody><tr>
+					  <td align="right">日期：
+						从<input type="text" size="12" id="date-start" value="2015-06-01" name="filter_date_start" class="hasDatepicker"> 到 
+						<input type="text" size="12" id="date-end" value="2015-06-30" name="filter_date_end" class="hasDatepicker"></td>
+					  <td>
+					  <a class="button">导出</a> 
+					  </td>
+					</tr>
+				  </tbody>
+				 </table>
+				 <div class="tab">
+					 <a href="__CONTROLLER__/add"><u>添加用户</u></a>
+				 </div>
+				<table id="user_tb" style="width:710px;min-height:400px;">
+					
+				</table>
+			</div>
+			
+			<div class="content" style="width:280px;margin-left:4px;padding:0;height:480px;">
+			    <div id="aa" class="easyui-accordion" fit="true">
+					<div id="user_detail" title="详细信息" data-options="selected:true" style="overflow:auto;padding:10px;">
+						
+						
+					</div>
+					<div title="地图位置">
+						
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			$("#user_tb").datagrid({
+				url: ROOT + '/User/jsondata',
+				fit: true,
+				border: false,
+				striped: true,
+				//sortName: 'id',
+				//sortOrder: 'asc',
+				pagination: true,
+				pagePosition: 'bottom',
+				pageSize: 20,
+				singleSelect: true,
+				checkOnSelect: true,
+				pageList: [20, 40, 60, 80],
+				//fitColumns: true,
+				//toolbar: "#tb",
+				columns:[[
+					//{field:'id',title:'id', hidden:true},
+					{field:'username',title:'用户名',width:100},
+					{field:'smartphone',title:'手机号码',width:100},
+					{field:'city_name',title:'城市',width:110},
+					{field:'user_type_name',title:'用户类型',width:105},
+					{field:'last_login_time',title:'最后一次登录时间',width:150},
+					{field:'id',title:'操作', width:100, align:'center',formatter:function(value,row,index){
+						return "<a>编辑</a>";
+					}}
+				]],
+				onLoadError: function(data) {
+					alert(data.responseText);
+				},
+				onClickRow: function(index, row) {
+					var str = '<table class="detail" cellspacing="1" cellpadding="5">';
+					str +=	'<tr>';
+					str +=	'<td>用户名</td>';
+					str +=	'<td>'+row.username+'</td>';
+					str +=	'</tr>';
+					str +=	'<tr>';
+					str +=	'<td>手机号码</td>';
+					str +=	'<td>'+row.smartphone+'</td>';
+					str +=	'</tr>';
+					str +=	'<tr>';
+					str +=	'<td>城市</td>';
+					str +=	'<td>'+row.city_name+'</td>';
+					str +=	'</tr>';
+					str +=	'<tr>';
+					str +=	'<td>用户类型</td>';
+					str +=	'<td>'+row.user_type_name+'</td>';
+					str +=	'</tr>';
+					str +=	'<tr>';
+					str +=	'<td style="width:80px;">创建时间</td>';
+					str +=	'<td>'+row.create_time+'</td>';
+					str +=	'</tr>';
+					str +=	'<tr>';
+					str +=	'<td>最后一次登录时间</td>';
+					str +=	'<td>'+(row.last_login_time || "")+'</td>';
+					str +=	'</tr>';
+					str +=	'<tr>';
+					str +=	'<td>最后一次登录ip</td>';
+					str +=	'<td>'+(row.last_login_ip || "")+'</td>';
+					str +=	'</tr>';
+					str +=	'</table>';
+					$("#user_detail").html(str);
+				}
+			});
+		</script>
+<include file="Common/footer" />

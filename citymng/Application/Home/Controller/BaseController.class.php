@@ -14,4 +14,11 @@ class BaseController extends Controller {
 			}
 		}
 	}
+	
+	protected function generateDataForDataGrid($total, $data) {
+		return json_encode(array(
+			'rows'=>(empty($data) ? array() : $data), 
+			'total'=>$total
+		));
+	}
 }
