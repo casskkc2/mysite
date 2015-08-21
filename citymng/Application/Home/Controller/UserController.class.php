@@ -2,6 +2,11 @@
 namespace Home\Controller;
 use Think\Controller;
 class UserController extends GlobalController {
+	function _initialize(){
+		if ($this->user['user_type_id'] != 10) {
+			$this->error('无权限访问');
+		}
+	}
     public function index(){
 		$this->assign('title', '用户管理');
 		

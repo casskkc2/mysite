@@ -14,7 +14,10 @@ class GlobalController extends BaseController {
 		$this->user = session('user');
 		$this->city = session('city');
 		$this->area_arr = explode(',', $this->user['area']);
-		$this->target_arr = explode(',', $this->user['target']);		
+		$this->target_arr = explode(',', $this->user['target']);
+		
+		$this->assign('current_user', $this->user);
+		$this->assign('current_city', $this->city);
 	}
 	
 	/*

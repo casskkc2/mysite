@@ -26,4 +26,10 @@ class AccountController extends GlobalController {
 		$this->assign('title', '修改密码');
 		$this->display();
     }
+	
+	public function logout() {
+		session('user', null);
+		session('city', null);
+		$this->redirect('Home/Public/index');
+	}
 }
