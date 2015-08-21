@@ -50,6 +50,48 @@ class UserController extends GlobalController {
 		$this->display();
 	}
 	
+	public function edit() {
+		if($_POST) {
+			$data = array(
+				'id' => I('post.id'),
+				'smartphone' => I('post.smartphone'),
+				'user_type_id' => I('post.user_type_id'),
+				'city_id' => I('post.city'),
+				'target' => I('post.target'),
+				'area' => I('post.area')
+			);
+			$newpwd = I('post.newpwd');
+			if (!empty($newpwd)) {
+				$data['password'] = md5encode($newpwd);
+			}
+			
+			$id = M('User')->data($data)->save();
+			if ($id > 0) {
+				$this->success('编辑用户信息成功', U('Home/User/index'), 3);
+			}
+			$this->error('编辑用户信息失败', 'javascript:history.back(-1);', 5);
+		}
+		$id = I('get.id', 0);
+		if (empty($id)) $this->error('参数错误', 'javascript:history.back(-1);', 5);
+		
+		$user = M('User')->alias('u')
+			->field('u.*, c.father AS province_id')
+			->join('LEFT JOIN city c ON u.city_id=c.city_id')
+			->where(array('u.id'=>$id))->find();
+		if (empty($user)) $this->error('参数错误', 'javascript:history.back(-1);', 5);
+		
+		$user_types = M('UserType')->select();
+		$this->assign('user_types', $user_types);
+		
+		$AreaEvent = A('Area', 'Event');
+		$provinces = $AreaEvent->getProvinceList();
+		$this->assign('provinces', $provinces);
+		
+		$this->assign('title', '编辑用户信息');
+		$this->assign('user', $user);
+		$this->display();
+	}
+	
 	public function jsondata() {
 		$page = I('post.page', 1);
 		$rows = I('post.rows', 20);

@@ -59,7 +59,7 @@
 					{field:'user_type_name',title:'用户类型',width:105},
 					{field:'last_login_time',title:'最后一次登录时间',width:150},
 					{field:'id',title:'操作', width:100, align:'center',formatter:function(value,row,index){
-						return "<a>编辑</a>";
+						return "<a href='__CONTROLLER__/edit/id/" + row.id + "'>编辑</a>";
 					}}
 				]],
 				onLoadError: function(data) {

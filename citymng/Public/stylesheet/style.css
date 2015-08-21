@@ -192,6 +192,10 @@ a.button {
 .tab ul li a { color : #fff;}
 .tab ul li.selected a { color : #fff;}
 
+.gray {
+	color:#666;
+}
+
 #footer {
 	height: 30px;
 	text-align: center;

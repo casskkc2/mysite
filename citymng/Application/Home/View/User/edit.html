@@ -1,0 +1,181 @@
+<include file="Common/header" />
+<link href="__PUBLIC__/javascript/jqueryValidate/css/cmxform.css" rel="stylesheet" type="text/css" />
+<script src="__PUBLIC__/javascript/jqueryValidate/jquery.validate.js"></script>
+<script src="__PUBLIC__/javascript/jqueryValidate/jquery.metadata.js"></script>
+		<div class="box">
+			<div class="content" style="width:999px">
+			<form id="formSubmit" action="__SELF__" method="POST">
+				<table class="form2">
+					<tbody>
+					<tr>
+					  <td align="right">用户名：</td>
+					  <td align="left">
+						{$user.username}
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right">密码：</td>
+					  <td align="left">
+						<input type="password" id="newpwd" name="newpwd" /> <span class="gray">若不想修改密码，请留空。</span>
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right">确认密码：</td>
+					  <td align="left">
+						<input type="password" id="newpwd2" name="newpwd2" />
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right">手机号码：</td>
+					  <td align="left">
+						<input type="text" id="smartphone" name="smartphone" value="{$user.smartphone}" data-rule-required="true" data-msg-required="请输入手机号码" />
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right">用户类型：</td>
+					  <td align="left">
+						<select id="user_type_id" name="user_type_id">
+							<volist name="user_types" id="vo">
+							<option value="{$vo.user_type_id}" <if condition="$vo.user_type_id eq $user['user_type_id']">selected="selected"</if>>{$vo.type_name}</option>
+							</volist>
+						</select>
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right">城市：</td>
+					  <td align="left">
+						<select id="province">
+							<volist name="provinces" id="vo">
+							<option value="{$vo.province_id}" <if condition="$vo.province_id eq $user['province_id']"> selected="selected"</if>>{$vo.province}</option>
+							</volist>
+						</select>
+						<select id="city" name="city">
+						</select>
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right">区域：</td>
+					  <td align="left">
+						<ul id="area_tree"></ul>
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right">指标：</td>
+					  <td align="left">
+						<ul id="target_tree"></ul>
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right"></td>
+					  <td align="left">
+						<input type="hidden" id="target" name="target" value="{$user.target}" />
+						<input type="hidden" id="area" name="area" value="{$user.area}" />
+						<input type="hidden" id="id" name="id" value="{$user.id}" />
+						<a id="btn_submit" class="button">提交</a>
+					  </td>
+					</tr>
+				  </tbody>
+				 </table>
+			</form>
+			</div>
+		</div>
+		<script type="text/javascript">
+			$(function() {
+				$("#btn_submit").click(function(){
+					$("#formSubmit").submit();            
+				});
+				
+				$("#province").on('change', function() {
+					var sel_province_id = $("#province").val();
+					getCityList(sel_province_id, "{$user.city_id}", function() {
+						$("#city").change();
+					});
+				}).change();
+				
+				$("#city").on('change', function() {
+					loadTree($(this).val());
+				});
+				
+				jQuery.validator.addMethod("confirmPwd",function(value, element) {
+					return this.optional(element) || value == $("#newpwd").val();
+				}, "");
+				$("#formSubmit").validate({
+					submitHandler: function(form) {
+						setAreaAndTarget();
+						form.submit();
+					},
+					rules: {
+						newpwd2: {
+							required: {
+								depends: function(element) {
+									return $("#newpwd").val() != "";
+								}
+							},
+							confirmPwd: true
+						}
+					},
+					messages: {
+						newpwd2: {
+							required: "请输入确认密码",
+							confirmPwd: "两次输入的密码不一致"
+						}
+					}
+				});
+			});
+			
+			function loadTree(city_id) {
+				$("#area_tree").tree({
+					url: ROOT + '/Area/getTree',
+					queryParams: {city_id: city_id},
+					checkbox: true,
+					//onlyLeafCheck: true
+					onLoadSuccess: function(node, data) {
+						selectNodes("area_tree", data, $("#area").val());
+					}
+				});
+				$("#target_tree").tree({
+					url: ROOT + '/Target/getTree',
+					queryParams: {city_id: city_id},
+					checkbox: true,
+					//onlyLeafCheck: true
+					onLoadSuccess: function(node, data) {
+						selectNodes("target_tree", data, $("#target").val());
+					}
+				});
+			}
+			
+			function setAreaAndTarget() {
+				$("#area").val(getTreeChecked("area_tree"));
+				$("#target").val(getTreeChecked("target_tree"));
+			}
+			
+			function getTreeChecked(tree_id) {
+				var tree_obj = $("#"+tree_id);
+				var nodes = tree_obj.tree("getChecked");
+				var val = "";
+				for(var i=0; i < nodes.length; i++) {
+					if (tree_obj.tree("isLeaf", nodes[i].target)) {
+						if (val == "") val = nodes[i].id;
+						else val += "," + nodes[i].id;
+					}
+				}
+				return val;
+			}
+			
+			function selectNodes(tree_id, nodes, ids) {
+				if (ids == "") return false;
+				
+				var tree_obj = $("#"+tree_id);
+				ids = "," + ids + ",";
+				for(var i=0; i < nodes.length; i++) {
+					if (ids.indexOf("," + nodes[i].id + ",") > -1) {
+						tree_obj.tree("check", nodes[i].target);
+					}
+					var children = tree_obj.tree("getChildren", nodes[i].target);
+					if (children.length > 0) {
+						selectNodes(tree_id, children, ids);
+					}
+				}
+			}
+		</script>
+<include file="Common/footer" />
