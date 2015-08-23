@@ -9,6 +9,8 @@ class GlobalController extends BaseController {
 	protected $target_arr;
 	
 	function _initialize(){//var_dump(CONTROLLER_NAME);var_dump(ACTION_NAME);exit;
+		parent::_initialize();
+		
 		A("Public")->detectLogin();
 		
 		$this->user = session('user');

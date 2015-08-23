@@ -3,6 +3,7 @@ namespace Home\Controller;
 use Think\Controller;
 class AreaController extends GlobalController {
 	function _initialize(){
+		parent::_initialize();
 		if ($this->user['user_type_id'] != 10) {
 			$this->error('无权限访问');
 		}
