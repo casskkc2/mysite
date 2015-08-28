@@ -29,3 +29,10 @@ function buildTree($data, $pid=',0,', $attrs=array(), $id="id", $text='name') {
 	
 	return $tree;
 }
+
+function treePathToArray($path) {
+	$tmp_arr = explode(',', $path);
+	return array_filter($tmp_arr, function($v) {
+		return !empty($v);
+	});
+}

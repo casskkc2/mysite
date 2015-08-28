@@ -69,6 +69,49 @@ class GlobalController extends BaseController {
     	}
 	}
 	
+	public function _upload2($file, $thumb = false, $width = 360, $height = 360){
+		$root = C('UPLOAD_DIR');
+		$path = date("Ym") . '/';
+		
+		if (!is_dir($root . $path))	mkdir($path);  
+		
+		$config = array(    
+			'maxSize'    =>    10 * 1024 * 1024,
+			'savePath'   =>    $path,
+			'rootPath'	 =>	   $root,
+			'saveName'   =>    time().'_'.mt_rand(10000,99999),
+			'exts'       =>    explode('|',strtolower(C('ALLOW_IMG_TYPE'))),    
+			'autoSub'    =>    false,    
+		);
+		$upload = new \Think\Upload($config);
+		
+		$info = $upload->uploadOne($file);
+        if(!$info){
+            //捕获上传异常
+            return $upload->getError();
+        }else{
+			$return = array();
+			
+			//上传成功
+			$file_path = $root . $info['savepath'] . $info['savename'];
+			$return['file_path'] = $file_path;
+//$fh = fopen('./test.txt', "a");
+//fwrite($fh, $file_path);
+//fclose($fh);			
+			if ($thumb) {
+				$thumb_file_path =  $root . $info['savepath'] . 'thumb_' . $info['savename'];
+				
+				$image = new \Think\Image(); 
+				$image->open($file_path);
+				$image->thumb($width, $height)->save($thumb_file_path);
+				
+				$return['thumb_path'] = $thumb_file_path;
+			}
+			
+			return $return;
+    	}
+	}
+	
 	/*
 		检查用户组权限
 		@$module 可指定参数

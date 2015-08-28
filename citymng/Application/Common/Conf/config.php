@@ -10,4 +10,7 @@ return array(
 	
 	'TMPL_ACTION_ERROR' 	=> 'Home@Common:error',
 	'TMPL_ACTION_SUCCESS'	=> 'Home@Common:error',
+	
+	'ALLOW_IMG_TYPE' => 'jpg|gif|png|jpeg',
+	'UPLOAD_DIR' => 'upload/',
 );

@@ -1,0 +1,4 @@
+	<option value="0">--请选择--</option>
+	<volist name="list" id="vo">
+	<option value="{$vo.id}"<if condition="$vo.id eq $sel_id"> selected</if>>{$vo.name}</option>
+	</volist>

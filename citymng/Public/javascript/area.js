@@ -18,6 +18,44 @@ function getCityList(province_id, sel_city_id, callback) {
 	});
 }
 
+function getAreaList(pid, sel_id, callback) {
+	var callback = callback || function() {};
+	var data = {};
+	data.pid = pid;
+	data.sel_id = sel_id;
+	$.ajax({
+		url: ROOT + "/Issue/getAreaList",
+		type: "post",
+		data: data,
+		dataType: 'html',
+		success: function(html) {
+			callback(html);
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+}
+
+function getTargetList(pid, sel_id, callback) {
+	var callback = callback || function() {};
+	var data = {};
+	data.pid = pid;
+	data.sel_id = sel_id;
+	$.ajax({
+		url: ROOT + "/Issue/getTargetList",
+		type: "post",
+		data: data,
+		dataType: 'html',
+		success: function(html) {
+			callback(html);
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+}
+
 function getMaxSortNum(url, city_id, callback) {
 	$.ajax({
 		url: url,

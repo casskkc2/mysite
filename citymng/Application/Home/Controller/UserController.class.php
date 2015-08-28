@@ -72,7 +72,7 @@ class UserController extends GlobalController {
 			}
 			
 			$id = M('User')->data($data)->save();
-			if ($id > 0) {
+			if ($id !== false) {
 				$this->success('编辑用户信息成功', U('Home/User/index'), 3);
 			}
 			$this->error('编辑用户信息失败', 'javascript:history.back(-1);', 5);

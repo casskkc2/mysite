@@ -1,0 +1,251 @@
+<include file="Common/header" />
+<link href="__PUBLIC__/javascript/jqueryValidate/css/cmxform.css" rel="stylesheet" type="text/css" />
+<script src="__PUBLIC__/javascript/jqueryValidate/jquery.validate.js"></script>
+<script src="__PUBLIC__/javascript/jqueryValidate/jquery.metadata.js"></script>
+<style type="text/css">
+.reply_margin {
+	margin-left:5px;
+}
+</style>
+		<div id="issueFormDiv" class="box">
+			<div class="content" style="width:999px">
+			<form id="formSubmit" action="__SELF__" method="POST" enctype="multipart/form-data">
+				<table class="form2">
+					<tbody>
+					<tr>
+					  <td align="right">区域：</td>
+					  <td align="left">
+						<select id="area_0">
+						<option value="0">--请选择--</option>
+						<volist name="area_list" id="vo">
+							<option value="{$vo.id}">{$vo.name}</option>
+						</volist>
+						</select>
+						<input type="hidden" id="area_name_0" name="area_name[]" />
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right">指标：</td>
+					  <td align="left">
+						<select id="target_0">
+						<option value="0">--请选择--</option>
+						<volist name="target_list" id="vo">
+							<option value="{$vo.id}">{$vo.name}</option>
+						</volist>
+						</select>
+						<input type="hidden" id="target_name_0" name="target_name[]" />
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right">检查时间：</td>
+					  <td align="left">
+						<div style="float:left;" class=""><input type="text" class="easyui-datetimebox" data-options="required:true,showSeconds:false,missingMessage:'请选择检查日期',value:'{$info.examine_time}'" id="examine_time" name="examine_time" /></div>
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right">计数：</td>
+					  <td align="left">
+						<input type="text" id="weight" name="weight" value="{$info.weight|default=1}" data-rule-required="true" data-msg-required="请输入计数值" />
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right">标题：</td>
+					  <td align="left">
+						<input type="text" id="title" name="title" size="100" data-rule-required="true" data-msg-required="请输入标题" />
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right">详细信息：</td>
+					  <td align="left">
+						<textarea type="text" id="des" name="des" style="height:150px;width:400px;">{$info.des}</textarea>
+					  </td>
+					</tr>
+					<if condition="empty($info)">
+					<tr>
+					  <td align="right" valign="top">附件：</td>
+					  <td align="left">
+					  <table>
+						<tbody id="tbody_reply">
+						<tr><td><input type="button" id="btn_add_reply" value="增加附件" /></td></tr>
+						<tr><td>
+						<select id="reply_type_0" name="reply_type[]">
+							<option value="2">图片</option>
+							<option value="3">视频</option>
+						</select><input type="file" id="reply_0" class="reply_margin" name="reply_img[]" />
+						</td></tr>
+						</tbody>
+					  </table>
+					  </td>
+					</tr>
+					</if>
+					<tr>
+					  <td align="right"></td>
+					  <td align="left">
+						<if condition="!empty($info)">
+						<input type="hidden" name="id" value="{$info.id}" />
+						</if>
+						<a id="btn_submit" class="button">提交</a>
+					  </td>
+					</tr>
+				  </tbody>
+				 </table>
+			</form>
+			</div>
+		</div>
+		<script>
+		var area_id_arr = [];
+		var target_id_arr = [];
+		<if condition="!empty($info)">	
+			<volist name="area_id_arr" id="vo">
+			area_id_arr.push("{$vo}");
+			</volist>
+			
+			<volist name="target_id_arr" id="vo">
+			target_id_arr.push("{$vo}");
+			</volist>
+			
+			$(function() {
+				$("option[value=" + area_id_arr[0] + "]", $("#area_0")).attr("selected", "selected");
+				$("option[value=" + target_id_arr[0] + "]", $("#target_0")).attr("selected", "selected");
+			});
+		</if>
+		</script>
+		<script type="text/javascript">
+			$(function() {
+				$("#btn_submit").click(function(){
+					$("#formSubmit").submit();            
+				});
+				
+				$("#issueFormDiv").on("change", "select[id^=area_]", function() {
+					var c_a_id = $(this).val();	
+					
+					var i = $(this).attr("id").split("_")[1];
+					
+					//alert( $("option:selected", $(this)).text() );
+					if (c_a_id != 0) {
+						$("#area_name_" + i).val($("option:selected", $(this)).text());
+					}
+					var new_i = parseInt(i) + 1; //alert(new_i);
+					var sel_id = 0;
+					if (area_id_arr[new_i]) sel_id = area_id_arr[new_i];
+					getAreaList(c_a_id, sel_id, function(html) {
+						if (html != '') {
+							$("#area_" + i).attr("name", "");
+							if ( $("#area_" + new_i).length == 0 ) {
+								$("#area_name_" + i).after('&nbsp;<select id="area_' + new_i + '"></select><input type="hidden" id="area_name_' + new_i + '" name="area_name[]" />');
+							}
+							$("#area_" + new_i).html(html).change();
+						}else {
+							$("#area_" + i).attr("name", "area_id");
+							$("select[id^=area_]").each(function(index) {
+								var j = $(this).attr("id").split("_")[1]; //alert(j + '?' + i);
+								if (j > i) {
+									$(this).remove();
+									$("#area_name_" + j).remove();
+								}
+							});
+							setIssueTitle();
+						}
+					});
+				});
+				$("#area_0").change();
+				
+				$("#issueFormDiv").on("change", "select[id^=target_]", function() {
+					var c_a_id = $(this).val();
+					
+					var i = $(this).attr("id").split("_")[1];
+					
+					//alert( $("option:selected", $(this)).text() );
+					if (c_a_id != 0) {
+						$("#target_name_" + i).val($("option:selected", $(this)).text());
+					}
+					var new_i = parseInt(i) + 1; //alert(new_i);
+					var sel_id = 0;
+					if (target_id_arr[new_i]) sel_id = target_id_arr[new_i];
+					getTargetList(c_a_id, sel_id, function(html) {
+						if (html != '') {
+							$("#target_" + i).attr("name", "");
+							if ( $("#target_" + new_i).length == 0 ) {
+								$("#target_name_" + i).after('&nbsp;<select id="target_' + new_i + '"></select><input type="hidden" id="target_name_' + new_i + '" name="target_name[]" />');
+							}
+							$("#target_" + new_i).html(html).change();
+						}else {
+							$("#target_" + i).attr("name", "target_id");
+							$("select[id^=target_]").each(function(index) {
+								var j = $(this).attr("id").split("_")[1]; //alert(j + '?' + i);
+								if (j > i) {
+									$(this).remove();
+									$("#target_name_" + j).remove();
+								}
+							});
+							setIssueTitle();
+						}
+					});
+				});
+				$("#target_0").change();
+				
+				$("#issueFormDiv").on("change", "select[id^=reply_type_]", function() {
+					var i = $(this).attr("id").split("_")[2];
+					$("#reply_" + i).remove();
+					if ($(this).val() == 2) {
+						$(this).after('<input type="file" id="reply_' + i + '" class="reply_margin" name="reply_img[]" />');
+					}else {
+						$(this).after('<input type="text" id="reply_' + i + '" class="reply_margin" name="reply_video[]" size="100" />');
+					}
+				});
+				
+				$("#issueFormDiv").on('click', "input[id^=btn_rm_reply_]", function() {
+					$(this).parent().parent().remove();
+				});
+				
+				$("#btn_add_reply").click(function() {
+					var reply_type_objs = $("select[id^=reply_type_]");
+					var n_i = parseInt(reply_type_objs.eq(reply_type_objs.length - 1).attr("id").split("_")[2]) + 1;
+					$("#tbody_reply").append('<tr><td>'
+						+ '<select id="reply_type_'+n_i+'" name="reply_type[]"><option value="2">图片</option><option value="3">视频</option></select>'
+						+ '<input type="file" id="reply_'+n_i+'" name="reply_img[]" class="reply_margin" />'
+						+ '<input type="button" id="btn_rm_reply_'+n_i+'" value="删除" class="reply_margin" />'
+						+ '</td></tr>');
+				});
+				
+				$("#formSubmit").validate({
+					submitHandler: function(form) {
+						if ( !$("#formSubmit").form("validate") ) return false;
+						form.submit();
+					},
+					rules: {
+						area_id: {
+							required: true,
+							min: 1
+						},
+						target_id: {
+							required: true,
+							min: 1
+						}
+					},
+					messages: {
+						area_id: {
+							required: "请选择区域",
+							min: "请选择区域"
+						},
+						target_id: {
+							required: "请选择指标",
+							min: "请选择指标"
+						}
+					}
+				});
+			});
+			
+			function setIssueTitle() {
+				var title = '';
+				$("input[id^=area_name_]").each(function() {
+					title += $(this).val();
+				});
+				$("input[id^=target_name_]").each(function() {
+					title += $(this).val();
+				});
+				
+				$("#title").val(title);
+			}
+		</script>
+<include file="Common/footer" />

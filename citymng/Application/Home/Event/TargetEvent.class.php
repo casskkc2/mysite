@@ -1,0 +1,1 @@
+<?phpnamespace Home\Event;use Think\Controller;class TargetEvent extends Controller {		public function getTargetList($city_id, $pid) {		$cond = array(			'city_id' => $city_id,			'path' => array('like', '%,'.$pid.','),		);		$list = M('Target')->where($cond)->order('sort')->select();		return $list;	}}
