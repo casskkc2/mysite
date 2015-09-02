@@ -1,0 +1,167 @@
+<include file="Common/header" />
+		<div class="box">
+			<div class="content" style="width:715px">
+				<table class="form">
+					<tbody><tr>
+					  <td align="right">检查日期：
+						从<input type="text" size="12" id="filter_date_start" value="2015-06-01" name="filter_date_start" class="hasDatepicker"> 到 
+						<input type="text" size="12" id="filter_date_end" value="2015-06-30" name="filter_date_end" class="hasDatepicker"></td>
+					  <td align="right">
+					  关键字：<input type="text" id="keywords" placeholder="编号，区域，类别，备注" value="" /></td>
+					  <td>
+					  <a class="button">搜索</a> 
+					  </td>
+					</tr>
+				  </tbody>
+				 </table>
+				 <div class="tab">
+					 <ul>
+						<li><a>待审核</a></li>
+						<li class="selected"><a>未通过</a></li>
+						<li><a>通过</a></li>
+						<li><a>已处理</a></li>
+						<li><a>超时</a></li>
+						<li><a>重点问题</a></li>
+						<li><a>同意无法处理</a></li>
+					 </ul>
+				 </div>
+				 
+				<table id="tb" style="width:710px;min-height:400px;">
+				</table>
+				
+				<table class="form" style="margin:15px 0 10px;">
+					<tbody>
+					<tr>
+						<td></td>
+						<td align="right"><a class="button">导出问题</a> <a class="button">带图片导出</a> <a class="button">导出汇总</a></td>
+					</tr>
+				  </tbody>
+				 </table>
+			</div>
+			
+			<div class="content" style="width:280px;margin-left:4px;padding:0;height:545px;">
+			    <div id="aa" class="easyui-accordion" fit="true">
+					<div title="问题详情" data-options="selected:true" style="overflow:auto;padding:10px;">
+						<table class="detail" cellspacing="1" cellpadding="5">
+							<tr>
+								<td style="width:80px;">编号</td>
+								<td>001</td>
+							</tr>
+							<tr>
+								<td>区域</td>
+								<td>武昌区</td>
+							</tr>
+							<tr>
+								<td>类别</td>
+								<td>主次干道</td>
+							</tr>
+							<tr>
+								<td>街/路</td>
+								<td>雄楚大街 雄楚路</td>
+							</tr>
+							<tr>
+								<td>指标代码</td>
+								<td>1000</td>
+							</tr>
+							<tr>
+								<td>指标名称</td>
+								<td>暴露垃圾</td>
+							</tr>
+							<tr>
+								<td>标题</td>
+								<td>武昌区主次干道雄楚大街熊出路暴露垃圾</td>
+							</tr>
+							<tr>
+								<td>检查日期</td>
+								<td>2015-07-25</td>
+							</tr>
+							
+						</table>
+						<br />
+						<div style="text-align:right;">
+						<a class="button">编辑</a>
+						</div>
+					</div>
+					<div title="问题回复" data-options="" style="padding:10px;">
+						
+					</div>
+					<div title="地图位置">
+						
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			var toolbar = [{
+				text:'通过',
+				iconCls:'icon-ok',
+				handler:function(){alert('yes')}
+			},{
+				text:'不通过',
+				iconCls:'icon-no',
+				handler:function(){alert('noe')}
+			}];
+			
+			$("#tb").datagrid({
+				url: ROOT + '/Issue/jsondata',
+				fit: true,
+				border: false,
+				striped: true,
+				//sortName: 'id',
+				//sortOrder: 'asc',
+				pagination: true,
+				pagePosition: 'bottom',
+				pageSize: 20,
+				singleSelect: true,
+				checkOnSelect: true,
+				pageList: [20, 40, 60, 80],
+				//fitColumns: true,
+				toolbar: toolbar,
+				columns:[[
+					{field:'aid',title:'', checkbox:true},
+					{field:'id',title:'编号', width:50},
+					{field:'area1',title:'区域',width:80},
+					{field:'title',title:'标题',width:310},
+					{field:'date',title:'检查日期',width:80},
+					{field:'time',title:'检查时间',width:80},
+					{field:'weight',title:'计数',width:80}
+				]],
+				onLoadError: function(data) {
+					alert(data.responseText);
+				},
+				onClickRow: function(index, row) {
+					/*var str = '<table class="detail" cellspacing="1" cellpadding="5">';
+					str +=	'<tr>';
+					str +=	'<td>用户名</td>';
+					str +=	'<td>'+row.username+'</td>';
+					str +=	'</tr>';
+					str +=	'<tr>';
+					str +=	'<td>手机号码</td>';
+					str +=	'<td>'+row.smartphone+'</td>';
+					str +=	'</tr>';
+					str +=	'<tr>';
+					str +=	'<td>城市</td>';
+					str +=	'<td>'+row.city_name+'</td>';
+					str +=	'</tr>';
+					str +=	'<tr>';
+					str +=	'<td>用户类型</td>';
+					str +=	'<td>'+row.user_type_name+'</td>';
+					str +=	'</tr>';
+					str +=	'<tr>';
+					str +=	'<td style="width:80px;">创建时间</td>';
+					str +=	'<td>'+row.create_time+'</td>';
+					str +=	'</tr>';
+					str +=	'<tr>';
+					str +=	'<td>最后一次登录时间</td>';
+					str +=	'<td>'+(row.last_login_time || "")+'</td>';
+					str +=	'</tr>';
+					str +=	'<tr>';
+					str +=	'<td>最后一次登录ip</td>';
+					str +=	'<td>'+(row.last_login_ip || "")+'</td>';
+					str +=	'</tr>';
+					str +=	'</table>';
+					$("#user_detail").html(str);*/
+				}
+			});
+		</script>
+<include file="Common/footer" />

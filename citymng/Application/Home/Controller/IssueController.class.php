@@ -8,7 +8,7 @@ class IssueController extends GlobalController {
 	}
     public function index(){
 		$this->assign('title', '问题管理');
-		$this->display('Index/index');
+		$this->display();
     }
 	
 	public function add() {
@@ -234,35 +234,38 @@ class IssueController extends GlobalController {
 	public function jsondata() {
 		$page = I('post.page', 1);
 		$rows = I('post.rows', 20);
-		$sort = I('post.sort', 'username');
+		$sort = I('post.sort', 'id');
 		$order_by = I('post.order', 'ASC');
 		
 		$username = I('post.username', '');
 		$smartphone = I('post.smartphone', '');
-		$city_id = I('post.city_id', '');
 		
-		$cond = array();
+		$cond = array(
+			'city_id' => $this->city['city_id'],
+			'area_id' => array('in', $this->user['area']),
+			'target_id' => array('in', $this->user['target'])
+		);
 		empty($username) || $cond['u.username'] = array('like', $username.'%');
 		empty($smartphone) || $cond['u.smartphone'] = $smartphone;
-		empty($city_id) || $cond['u.city_id'] = $city_id;
+		
 		
 		//empty($cond) || $cond['_logic']='or';
 		
-		$total = M('User')->alias('u')
+		$total = M('Issue')->alias('a')
 			->where($cond)->count();
 		
 		$start = ($page - 1) * $rows;
-		$list = M('User')->alias('u')
-			->field('
-				u.*, 
-				ut.type_name AS user_type_name,
-				c.city AS city_name')
-			->join('INNER JOIN user_type ut ON u.user_type_id=ut.user_type_id')
-			->join('INNER JOIN city c ON u.city_id=c.city_id')
+		$list = M('Issue')->alias('a')
+			->field('a.*')
 			->where($cond)
 			->order($sort . ' ' . $order_by)
 			->limit($start, $rows)
 			->select();
+		foreach($list as $key=>$row) {
+			$ts = strtotime($row['examine_time']);
+			$list[$key]['date'] = date('Y-m-d', $ts);
+			$list[$key]['time'] = date('H:i', $ts);
+		}
 			
 		echo $this->generateDataForDataGrid($total, $list);
 	}
