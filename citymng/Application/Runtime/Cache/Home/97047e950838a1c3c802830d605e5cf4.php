@@ -4,19 +4,15 @@
 <title>首页</title>
 <base href="" />
 <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-<link rel="stylesheet" type="text/css" href="/citymanagement/trunk/citymng/Public/stylesheet/style.css" />
-<script type="text/javascript" src="/citymanagement/trunk/citymng/Public/javascript/jquery/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/stylesheet/style.css" />
+<script type="text/javascript" src="/Public/javascript/jquery/jquery.min.js"></script>
 
-<link rel="stylesheet" href="/citymanagement/trunk/citymng/Public/javascript/jquery/jquery-easyui-1.4.2/themes/icon.css" />
-<link rel="stylesheet" href="/citymanagement/trunk/citymng/Public/javascript/jquery/jquery-easyui-1.4.2/themes/default/easyui.css" />
-<script type="text/javascript" src="/citymanagement/trunk/citymng/Public/javascript/jquery/jquery-easyui-1.4.2/jquery.easyui.min.js"></script>
+<link rel="stylesheet" href="/Public/javascript/jquery/jquery-easyui-1.4.2/themes/icon.css" />
+<link rel="stylesheet" href="/Public/javascript/jquery/jquery-easyui-1.4.2/themes/default/easyui.css" />
+<script type="text/javascript" src="/Public/javascript/jquery/jquery-easyui-1.4.2/jquery.easyui.min.js"></script>
 
-<script type="text/javascript" src="/citymanagement/trunk/citymng/Public/javascript/jquery/browser.js"></script>
+<script type="text/javascript" src="/Public/javascript/jquery/browser.js"></script>
 <script type="text/javascript">
-$(document).ready(function() {
-
-});
- 
 function getURLVar(urlVarName) {
 	var urlHalves = String(document.location).toLowerCase().split('?');
 	var urlVarValue = '';
@@ -49,12 +45,53 @@ function getURLVar(urlVarName) {
 			</marquee>
 		</div>
 		<div class="top_right">
-			用户名：<input type="text" name="username" /> 密码：<input type="password" name="password" /> <input type="button" id="btn_login" value="登录" />
+			用户名：<input type="text" id="username" name="username" /> 密码：<input type="password" id="password" name="password" /> <input type="button" id="btn_login" value="登录" />
 		</div>
 	</div>
 	<div id="content" class="home_content">
 		<div class="home_title">数字综合管理平台</div>
 	</div>
+	<script>
+	function login() {
+		var data = { } ;
+		data.username = $("#username").val();
+		data.password = $("#password").val();
+		if (data.username == '') {
+			alert("请输入用户名");
+			$("#username").get(0).focus();
+			return false;
+		} 
+		if (data.password == '') {
+			alert("请输入密码");
+			$("#password").get(0).focus();
+			return false;
+		} 
+		$.ajax( {
+			url: "/index.php/Home/Public/login",
+			type: "post",
+			data: data,
+			dataType: 'json',
+			success: function(json) {
+				if (json["error"]) {
+					alert(json["error"]);
+				}else {
+					if (json['chng_alert']) {
+						alert('请修改密码');
+					}
+					window.location.href = json["redirect"];
+				}
+			},
+			error: function(xhr, ajaxOptions, thrownError) {
+				alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+			}
+		} );
+	}
+	$(function() {
+		$("#btn_login").click(function() { 
+			login();
+		} );
+	});
+	</script>
 	<div id="footer">
 	版权所有
 	</div>

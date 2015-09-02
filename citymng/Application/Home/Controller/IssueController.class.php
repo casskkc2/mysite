@@ -269,19 +269,4 @@ class IssueController extends GlobalController {
 			
 		echo $this->generateDataForDataGrid($total, $list);
 	}
-	
-	public function checkUsername() {
-		$json = true;
-		
-		$username = I('post.username', '');
-		if (empty($username)) {
-			$json = '用户名不能为空';
-			$this->ajaxReturn($json);
-		}
-		
-		$d = M('User')->where(array('username'=>$username))->find();
-		if (!empty($d)) $json = false;
-		
-		$this->ajaxReturn($json);
-	}
 }
