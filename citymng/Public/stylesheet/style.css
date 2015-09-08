@@ -50,12 +50,14 @@ label {
 }
 #top {
 	height: 30px;
-	margin-top:10px;
+	/*margin-top:10px;*/
 	font-size: 13px;
+	background: url("../image/05.jpg");
+	padding-top:10px;
 }
 #top .top_left {
 	float:left;
-	line-height:30px;
+	/*line-height:30px;*/
 }
 
 #top .top_right {
@@ -70,7 +72,7 @@ label {
 #header {
 	height:110px;
 	/*background: url("../image/header.png") no-repeat;*/
-	background: url("../image/01.jpg");
+	background: url("../image/01_1.jpg");
 }
 .header_title {
 	font-size:36px;
@@ -108,7 +110,7 @@ label {
 	/*background: url("../image/02.jpg") no-repeat;*/
 }
 .home_content {
-	background: url("../image/home1024x580.jpg") no-repeat;
+	background: url("../image/home1024x768_2.jpg") no-repeat;
 }
 .home_title {
 	font-size: 36px;

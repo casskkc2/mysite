@@ -4,25 +4,25 @@
 				<table class="form">
 					<tbody><tr>
 					  <td align="right">检查日期：
-						从<input type="text" size="12" id="filter_date_start" value="2015-06-01" name="filter_date_start" class="hasDatepicker"> 到 
-						<input type="text" size="12" id="filter_date_end" value="2015-06-30" name="filter_date_end" class="hasDatepicker"></td>
+						从<input type="text" size="16" id="filter_date_start" value="" name="filter_date_start" class="easyui-datebox"> 到 
+						<input type="text" size="16" id="filter_date_end" value="" name="filter_date_end" class="easyui-datebox"></td>
 					  <td align="right">
 					  关键字：<input type="text" id="keywords" placeholder="编号，区域，类别，备注" value="" /></td>
 					  <td>
-					  <a class="button">搜索</a> 
+					  <a id="btn_search" class="button">搜索</a> 
 					  </td>
 					</tr>
 				  </tbody>
 				 </table>
 				 <div class="tab">
 					 <ul>
-						<li><a>待审核</a></li>
-						<li class="selected"><a>未通过</a></li>
-						<li><a>通过</a></li>
-						<li><a>已处理</a></li>
-						<li><a>超时</a></li>
-						<li><a>重点问题</a></li>
-						<li><a>同意无法处理</a></li>
+						<li <eq name="status" value="1">class="selected"</eq>><a href="{$self_url}/st/1">待审核</a></li>
+						<li <eq name="status" value="2">class="selected"</eq>><a href="{$self_url}/st/2">未通过</a></li>
+						<li <eq name="status" value="3">class="selected"</eq>><a href="{$self_url}/st/3">通过</a></li>
+						<li <eq name="status" value="4">class="selected"</eq>><a href="{$self_url}/st/4">已处理</a></li>
+						<li <eq name="status" value="21">class="selected"</eq>><a href="{$self_url}/st/21">超时</a></li>
+						<li <eq name="status" value="22">class="selected"</eq>><a href="{$self_url}/st/22">重点问题</a></li>
+						<li <eq name="status" value="9">class="selected"</eq>><a href="{$self_url}/st/9">同意无法处理</a></li>
 					 </ul>
 				 </div>
 				 
@@ -41,7 +41,7 @@
 			
 			<div class="content" style="width:281px;margin-left:4px;padding:0;height:545px;">
 			    <div id="aa" class="easyui-accordion" fit="true">
-					<div title="问题详情" data-options="selected:true" style="overflow:auto;padding:10px;">
+					<div id="issue_detail" title="问题详情" data-options="selected:true" style="overflow:auto;padding:10px;">
 						<table class="detail" cellspacing="1" cellpadding="5">
 							<tr>
 								<td style="width:80px;">编号</td>
@@ -92,6 +92,7 @@
 			</div>
 		</div>
 		<script type="text/javascript">
+			var status = "{$status}";
 			var toolbar = [{
 				text:'通过',
 				iconCls:'icon-ok',
@@ -101,6 +102,20 @@
 				iconCls:'icon-no',
 				handler:function(){alert('noe')}
 			}];
+			
+			$(function() {
+				$("#btn_search").click(function() {
+					var start_date = $("#filter_date_start").datebox("getValue");
+					var end_date = $("#filter_date_end").datebox("getValue");
+					var keywords = $("#keywords").val();
+					var params = {status: status};
+					if (start_date != "") params.start_date = start_date;
+					if (end_date != "") params.end_date = end_date;
+					if (keywords != "") params.keywords = keywords;
+					
+					$("#tb").datagrid("load", params);
+				});
+			});
 			
 			$("#tb").datagrid({
 				url: ROOT + '/Issue/jsondata',
@@ -115,6 +130,7 @@
 				singleSelect: true,
 				checkOnSelect: true,
 				pageList: [20, 40, 60, 80],
+				queryParams: {status: status},
 				//fitColumns: true,
 				toolbar: toolbar,
 				columns:[[
@@ -163,5 +179,21 @@
 					$("#user_detail").html(str);*/
 				}
 			});
+			
+			function detail(id) {
+				var data = {id: id, from: 'list_page'};
+				$.ajax({
+					url: ROOT + "/Issue/detail",
+					type: "post",
+					data: data,
+					dataType: 'html',
+					success: function(html) {
+						$("#issue_detail").html(html);
+					},
+					error: function(xhr, ajaxOptions, thrownError) {
+						alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+					}
+				});
+			}
 		</script>
 <include file="Common/footer" />

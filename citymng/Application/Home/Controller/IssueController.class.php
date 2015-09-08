@@ -7,7 +7,10 @@ class IssueController extends GlobalController {
 		
 	}
     public function index(){
+		$status_id = I('get.st', 1);
 		$this->assign('title', '问题管理');
+		$this->assign('status', $status_id);
+		$this->assign('self_url', U('Issue/index', '', ''));
 		$this->display();
     }
 	
@@ -232,41 +235,56 @@ class IssueController extends GlobalController {
 	}
 	
 	public function jsondata() {
-		$page = I('post.page', 1);
-		$rows = I('post.rows', 20);
-		$sort = I('post.sort', 'id');
-		$order_by = I('post.order', 'ASC');
+		$data = array();
+		$data['page'] = I('post.page', 1);
+		$data['rows'] = I('post.rows', 20);
+		$data['sort'] = I('post.sort', 'id');
+		$data['order_by'] = I('post.order', 'ASC');
 		
-		$username = I('post.username', '');
-		$smartphone = I('post.smartphone', '');
+		$data['city_id'] = $this->city['city_id'];
+		$data['area'] = $this->user['area'];
+		$data['target'] = $this->user['target'];
 		
-		$cond = array(
-			'city_id' => $this->city['city_id'],
-			'area_id' => array('in', $this->user['area']),
-			'target_id' => array('in', $this->user['target'])
-		);
-		empty($username) || $cond['u.username'] = array('like', $username.'%');
-		empty($smartphone) || $cond['u.smartphone'] = $smartphone;
+		$keywords = I('post.keywords', '');
+		//$keywords = I('get.keywords', '');
+		$start_date = I('post.start_date', '');
+		$end_date = I('post.end_date', '');
+		!empty($keywords) && $data['keywords'] = $keywords;
+		!empty($start_date) && $data['exm_start_date'] = $start_date;
+		!empty($end_date) && $data['exm_end_date'] = $end_date;
 		
-		
-		//empty($cond) || $cond['_logic']='or';
-		
-		$total = M('Issue')->alias('a')
-			->where($cond)->count();
-		
-		$start = ($page - 1) * $rows;
-		$list = M('Issue')->alias('a')
-			->field('a.*')
-			->where($cond)
-			->order($sort . ' ' . $order_by)
-			->limit($start, $rows)
-			->select();
-		foreach($list as $key=>$row) {
-			$ts = strtotime($row['examine_time']);
-			$list[$key]['date'] = date('Y-m-d', $ts);
-			$list[$key]['time'] = date('H:i', $ts);
+		$IssueEvent = A('Issue', 'Event');
+		$status = I('post.status', 0);
+		if(!empty($status)) {
+			$IssueEvent->statusToQueryCondition($status, $data);
 		}
+		
+		$res = $IssueEvent->getIssueList($data);
 			
-		echo $this->generateDataForDataGrid($total, $list);
+		echo $this->generateDataForDataGrid($res['total'], $res['data']);
+	}
+	
+	public function detail() {
+		$id = I('post.id');
+		$from = I('post.from', '');
+		
+		$IssueEvent = A('Issue', 'Event');
+		$info = $IssueEvent->getIssueDetail($id);
+		$this->assign('info', $info);
+		
+		$reply_list = $IssueEvent->getReplyList($id,'text');
+		$attachment_list = $IssueEvent->getReplyList($id,'attachment');
+		$this->assign('reply_list', $reply_list);
+		$this->assign('attachment_list', $attachment_list);
+		
+		if($from == 'list_page') {
+			$res = array();
+			$res['detail'] = $this->fetch('Issue:detail');
+			$res['reply'] = $this->fetch('Issue:reply');
+			$res['pos'] = array('lat'=>$info['lat'], 'lng'->$info['lng']);
+			$this->ajaxReturn($res);
+		}else {
+			$this->display('Issue:info');
+		}
 	}
 }
