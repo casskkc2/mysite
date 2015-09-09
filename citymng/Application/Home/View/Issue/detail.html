@@ -1,0 +1,41 @@
+	<table class="detail" cellspacing="1" cellpadding="5">
+		<if condition="!empty($info['img'])">
+		<tr>
+			<td colspan="2"><a href="{$info.img}" target="_blank" title="点击查看大图"><img src="{$info.img}" width="249" /></a></td>
+		</tr>
+		</if>
+		<tr>
+			<td style="width:80px;">编号</td>
+			<td>{$info.id}</td>
+		</tr>
+		<tr>
+			<td>区域街道</td>
+			<td>{$info.area_text}</td>
+		</tr>
+		<tr>
+			<td>指标代码</td>
+			<td>{$info.target_code}</td>
+		</tr>
+		<tr>
+			<td>指标名称</td>
+			<td>{$info.target_text}</td>
+		</tr>
+		<tr>
+			<td>标题</td>
+			<td>{$info.title}</td>
+		</tr>
+		<tr>
+			<td>检查日期</td>
+			<td>{$info.date}</td>
+		</tr>
+		<tr>
+			<td>状态</td>
+			<td>{$info.status_name}</td>
+		</tr>
+	</table>
+	<br />
+	<if condition="!empty($can_edit)">
+	<div style="text-align:right;">
+	<a class="button" href="__CONTROLLER__/edit/id/{$info.id}">编辑</a>
+	</div>
+	</if>

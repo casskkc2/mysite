@@ -264,6 +264,68 @@ class IssueController extends GlobalController {
 		echo $this->generateDataForDataGrid($res['total'], $res['data']);
 	}
 	
+	public function reply() {
+		$id = I('post.id');
+		//var_dump($id);exit;
+		$operation_id = I('post.operation_id', 0);
+		$reply_text = I('post.reply_text', '');
+		
+		$IssueEvent = A('Issue', 'Event');
+		$info = $IssueEvent->getIssueDetail($id);
+		if (empty($info)) {
+			echo '<script>parent.alert("参数错误");</script>';
+			exit;
+		}
+		
+		if (!empty($operation_id)) {
+			$stat = $IssueEvent->doOperation($operation_id, $this->user, $info, $this->setting);
+			if (false === $stat) {
+				echo '<script>parent.alert("操作失败");</script>';
+				exit;
+			}
+		}
+		if (!empty($reply_text)) {
+			$data = array(
+				'issue_id'	=> $info['id'],
+				'type'		=> 4,
+				'text'		=> $reply_text,
+				'user_id'	=> $this->user['id'],
+				'create_time'	=> date('Y-m-d H:i:s')
+			);
+			$stat = M('IssueReply')->data($data)->add();
+			if (false === $stat) {
+				echo '<script>parent.alert("回复失败");</script>';
+				exit;
+			}
+		}
+		if (!empty($_FILES['attachment'])) {
+			$file = $_FILES['attachment'];
+			
+			$file_info = $this->_upload2($file, false, 0, 0, 'no_limit');
+			if (is_array($file_info)) { // upload successfully
+				$data = array(
+					'issue_id'	=> $info['id'],
+					'type'		=> 1,
+					'user_id'	=> $this->user['id'],
+					'create_time'	=> date('Y-m-d H:i:s'),
+					'path' => $file_info['file_path']
+				);
+				$stat = M('IssueReply')->data($data)->add();
+				if (false === $stat) {
+					@unlink($file_info['file_path']);
+					echo '<script>parent.alert("附件上传失败!");</script>';
+					exit;
+				}
+			}else {
+				echo '<script>parent.alert("附件上传失败");</script>';
+				exit;
+			}
+		}
+		
+		echo '<script>parent.alert("操作成功"); parent.detail(' . $info['id'] . ');</script>';
+		exit;
+	}
+	
 	public function detail() {
 		$id = I('post.id');
 		$from = I('post.from', '');
@@ -273,17 +335,25 @@ class IssueController extends GlobalController {
 		$this->assign('info', $info);
 		
 		$reply_list = $IssueEvent->getReplyList($id,'text');
-		$attachment_list = $IssueEvent->getReplyList($id,'attachment');
+		$attachment_list = $IssueEvent->getReplyList($id,'attachment');//dump($attachment_list);exit;
 		$this->assign('reply_list', $reply_list);
 		$this->assign('attachment_list', $attachment_list);
 		
 		if($from == 'list_page') {
+			$can_edit = $IssueEvent->canEdit($info['status_id'], $this->user['user_type_id']);
+			$can_reply = $IssueEvent->canReply($info['status_id'], $this->user['user_type_id']);
+			$status_operations = $IssueEvent->getStatusOperations($info['status_id'], $this->user['user_type_id']);
+			$this->assign('can_edit', $can_edit);
+			$this->assign('can_reply', $can_reply);
+			$this->assign('status_operations', $status_operations);
+			
 			$res = array();
 			$res['detail'] = $this->fetch('Issue:detail');
 			$res['reply'] = $this->fetch('Issue:reply');
-			$res['pos'] = array('lat'=>$info['lat'], 'lng'->$info['lng']);
+			$res['pos'] = array('lat'=>$info['lat'], 'lng'=>$info['lng']);
 			$this->ajaxReturn($res);
 		}else {
+			
 			$this->display('Issue:info');
 		}
 	}

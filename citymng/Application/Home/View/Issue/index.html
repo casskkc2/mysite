@@ -42,47 +42,9 @@
 			<div class="content" style="width:281px;margin-left:4px;padding:0;height:545px;">
 			    <div id="aa" class="easyui-accordion" fit="true">
 					<div id="issue_detail" title="问题详情" data-options="selected:true" style="overflow:auto;padding:10px;">
-						<table class="detail" cellspacing="1" cellpadding="5">
-							<tr>
-								<td style="width:80px;">编号</td>
-								<td>001</td>
-							</tr>
-							<tr>
-								<td>区域</td>
-								<td>武昌区</td>
-							</tr>
-							<tr>
-								<td>类别</td>
-								<td>主次干道</td>
-							</tr>
-							<tr>
-								<td>街/路</td>
-								<td>雄楚大街 雄楚路</td>
-							</tr>
-							<tr>
-								<td>指标代码</td>
-								<td>1000</td>
-							</tr>
-							<tr>
-								<td>指标名称</td>
-								<td>暴露垃圾</td>
-							</tr>
-							<tr>
-								<td>标题</td>
-								<td>武昌区主次干道雄楚大街熊出路暴露垃圾</td>
-							</tr>
-							<tr>
-								<td>检查日期</td>
-								<td>2015-07-25</td>
-							</tr>
-							
-						</table>
-						<br />
-						<div style="text-align:right;">
-						<a class="button">编辑</a>
-						</div>
+						
 					</div>
-					<div title="问题回复" data-options="" style="padding:10px;">
+					<div id="issue_reply" title="问题回复" data-options="" style="padding:10px;">
 						
 					</div>
 					<div title="地图位置">
@@ -146,37 +108,7 @@
 					alert(data.responseText);
 				},
 				onClickRow: function(index, row) {
-					/*var str = '<table class="detail" cellspacing="1" cellpadding="5">';
-					str +=	'<tr>';
-					str +=	'<td>用户名</td>';
-					str +=	'<td>'+row.username+'</td>';
-					str +=	'</tr>';
-					str +=	'<tr>';
-					str +=	'<td>手机号码</td>';
-					str +=	'<td>'+row.smartphone+'</td>';
-					str +=	'</tr>';
-					str +=	'<tr>';
-					str +=	'<td>城市</td>';
-					str +=	'<td>'+row.city_name+'</td>';
-					str +=	'</tr>';
-					str +=	'<tr>';
-					str +=	'<td>用户类型</td>';
-					str +=	'<td>'+row.user_type_name+'</td>';
-					str +=	'</tr>';
-					str +=	'<tr>';
-					str +=	'<td style="width:80px;">创建时间</td>';
-					str +=	'<td>'+row.create_time+'</td>';
-					str +=	'</tr>';
-					str +=	'<tr>';
-					str +=	'<td>最后一次登录时间</td>';
-					str +=	'<td>'+(row.last_login_time || "")+'</td>';
-					str +=	'</tr>';
-					str +=	'<tr>';
-					str +=	'<td>最后一次登录ip</td>';
-					str +=	'<td>'+(row.last_login_ip || "")+'</td>';
-					str +=	'</tr>';
-					str +=	'</table>';
-					$("#user_detail").html(str);*/
+					detail(row.id);
 				}
 			});
 			
@@ -186,9 +118,10 @@
 					url: ROOT + "/Issue/detail",
 					type: "post",
 					data: data,
-					dataType: 'html',
-					success: function(html) {
-						$("#issue_detail").html(html);
+					dataType: 'json',
+					success: function(res) {
+						$("#issue_detail").html(res.detail);
+						$("#issue_reply").html(res.reply);
 					},
 					error: function(xhr, ajaxOptions, thrownError) {
 						alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);

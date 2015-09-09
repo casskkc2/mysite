@@ -14,5 +14,5 @@ return array(
 	'ALLOW_IMG_TYPE' => 'jpg|gif|png|jpeg',
 	'UPLOAD_DIR' => 'upload/',
 	
-	'HTTP_SERVER' => 'http://' . $_SERVER['SERVER_NAME'] . ($_SERVER['SERVER_PORT']=='80' ? '' : $_SERVER['SERVER_PORT']) . '/';
+	'HTTP_SERVER' => 'http://' . $_SERVER['SERVER_NAME'] . ($_SERVER['SERVER_PORT']=='80' ? '' : $_SERVER['SERVER_PORT']) . '/',
 );

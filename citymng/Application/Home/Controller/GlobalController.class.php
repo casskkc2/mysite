@@ -69,7 +69,7 @@ class GlobalController extends BaseController {
     	}
 	}
 	
-	public function _upload2($file, $thumb = false, $width = 360, $height = 360){
+	public function _upload2($file, $thumb = false, $width = 360, $height = 360, $exts='no_limit'){
 		$root = C('UPLOAD_DIR');
 		$path = date("Ym") . '/';
 		
@@ -83,6 +83,9 @@ class GlobalController extends BaseController {
 			'exts'       =>    explode('|',strtolower(C('ALLOW_IMG_TYPE'))),    
 			'autoSub'    =>    false,    
 		);
+		if ($exts === 'no_limit') {
+			$config['exts'] = '';
+		}
 		$upload = new \Think\Upload($config);
 		
 		$info = $upload->uploadOne($file);

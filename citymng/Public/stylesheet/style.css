@@ -143,6 +143,7 @@ label {
     overflow: auto;
     padding: 10px;
 	float:left;
+	background:#eee;
 }
 
 table.form, table.form2 {
@@ -169,7 +170,7 @@ table.detail {
 	background: #000;
 }
 table.detail tr td {
-	background: #fff;
+	background: #eee;
 }
 
 a.button {
