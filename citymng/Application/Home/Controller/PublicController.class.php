@@ -55,7 +55,7 @@ class PublicController extends BaseController {
 				$json['chng_alert'] = 1;
 				$json['redirect'] = U('Account/pwd');
 			}else {
-				$json['redirect'] = U('Index/index');
+				$json['redirect'] = U('Issue/index');
 			}
 			exit(json_encode($json));
 		}

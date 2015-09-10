@@ -8,6 +8,13 @@ class IssueController extends GlobalController {
 	}
     public function index(){
 		$status_id = I('get.st', 1);
+		
+		$IssueEvent = A('Issue', 'Event');
+		$tabs = $IssueEvent->getTabs($this->user['user_type_id']);//print_r($tabs);exit;
+		$tools = $IssueEvent->getPassBtns($status_id, $this->user['user_type_id']);
+		$this->assign('tabs', $tabs);
+		$this->assign('tools', $tools);
+		
 		$this->assign('title', '问题管理');
 		$this->assign('status', $status_id);
 		$this->assign('self_url', U('Issue/index', '', ''));
@@ -242,8 +249,10 @@ class IssueController extends GlobalController {
 		$data['order_by'] = I('post.order', 'ASC');
 		
 		$data['city_id'] = $this->city['city_id'];
-		$data['area'] = $this->user['area'];
-		$data['target'] = $this->user['target'];
+		if ( !in_array($this->user['user_type_id'], array(10, 20)) ) {
+			$data['area'] = $this->user['area'];
+			$data['target'] = $this->user['target'];
+		}
 		
 		$keywords = I('post.keywords', '');
 		//$keywords = I('get.keywords', '');
@@ -262,6 +271,41 @@ class IssueController extends GlobalController {
 		$res = $IssueEvent->getIssueList($data);
 			
 		echo $this->generateDataForDataGrid($res['total'], $res['data']);
+	}
+	
+	public function doCheck() { // pass or nopass
+		$json = array(
+			'status' => true,
+			'error'	=> ''
+		);
+		$ids = I('post.ids', '');
+		$mode = I('post.mode');
+		
+		if ($mode == 'pass') {
+			$data = array(
+				'status_id' 	=> 3,
+				'start_date' 	=> date('Y-m-d'),
+				'end_date'		=> date('Y-m-d', strtotime('+' . $this->setting['config_exp_days'] . ' days'))
+			);
+		}else if ($mode == 'nopass') {
+			$data = array(
+				'status_id' 	=> 2,
+				'start_date' 	=> NULL,
+				'end_date'		=> NULL
+			);
+		}else {
+			$json['status'] = false;
+			$this->ajaxReturn($json);
+		}
+		
+		$cond = array(
+			'id' => array('in', explode(',', $ids))
+		);
+		$stat = M('Issue')->where($cond)->data($data)->save();
+		if (false === $stat) {
+			$json['status'] = false;
+		}
+		$this->ajaxReturn($json);
 	}
 	
 	public function reply() {
@@ -355,6 +399,86 @@ class IssueController extends GlobalController {
 		}else {
 			
 			$this->display('Issue:info');
+		}
+	}
+	
+	public function export() {
+		$mode = I('get.mode', 'default');
+		$status = I('get.status', 0);
+		$filter_date_start = I('get.filter_date_start', '');
+		$filter_date_end = I('get.filter_date_end', '');
+		
+		!empty($filter_date_start) && $data['exm_start_date'] = $filter_date_start;
+		!empty($filter_date_end) && $data['exm_end_date'] = $filter_date_end;
+		
+		$IssueEvent = A('Issue', 'Event');
+		if(!empty($status)) {
+			$IssueEvent->statusToQueryCondition($status, $data);
+		}
+		
+		$res = $IssueEvent->getIssueList($data);
+		$data = $res['data'];
+		
+		$cols = array(
+			'区', '类别', '街', '路',
+			'一级指标', '二级指标', '三级指标', '指标代码',
+			'标题', '检查日期', '检查时间', '计数', '图片'
+		);
+		
+		if ($mode == 'default' || $mode == 'with_img') {
+			$rows = array();
+			foreach($data as $k=>$row) {
+				$img = '';
+				!empty($row['img']) && $img = C('HTTP_SERVER') . $row['img'];
+				$img_value = '';
+				!empty($img) && $img_value = array('text'=>$img, 'url'=>$img);
+				
+				$rows[] = array(
+					$row['area1'],$row['area2'],$row['area3'],$row['area4'],
+					$row['target1'],$row['target2'],$row['target3'],$row['target_code'],
+					$row['title'], $row['date'], $row['time'], $row['weight'], $img_value
+				);
+			}
+			$ExcelEvent = A('Excel', 'Event');
+			$ExcelEvent->export($cols, $rows, '问题导出' . date('Ymd'));
+		}
+	}
+	
+	public function importIssues() {
+		header('Content-Type: text/html;charset=UTF-8');
+		import('Vendor.PHPExcel.Classes.PHPExcel.IOFactory', '', '.php');
+		//require_once dirname(__FILE__) . '/Classes/PHPExcel/IOFactory.php';
+
+		$inputFileName = "test1.xlsx";
+
+		/**  Identify the type of $inputFileName  **/
+		$inputFileType = \PHPExcel_IOFactory::identify($inputFileName);
+		//echo 'Loading ' , $inputFileName , ' using ' , $inputFileType , " Reader" , PHP_EOL;
+
+		/**  Create a new Reader of the type that has been identified  **/
+		$objReader = \PHPExcel_IOFactory::createReader($inputFileType);
+		/**  Load $inputFileName to a PHPExcel Object  **/
+		$objReader->setReadDataOnly(true);
+		$objPHPExcel = $objReader->load($inputFileName);
+
+		$workSheet = $objPHPExcel->getActiveSheet();
+
+		foreach($workSheet->getRowIterator() as $key=>$row) {
+			//echo $key,'<br />';
+			if($key < 2) continue;
+			$cellIterator = $row->getCellIterator();
+			$cellIterator->setIterateOnlyExistingCells(false);// This loops all cells, even if it is not set. By default, only cells that are set will be iterated.
+			foreach($cellIterator as $k=>$cell) {
+				if($k == 0) echo $cell->getValue();
+				else if ($k == 1) echo $cell->getValue();
+				else echo '|', $cell->getValue();
+				
+			}
+			echo '<br />';
+			//echo $cellIterator[0]->getValue(), '|';
+			//echo $cellIterator[1]->getValue(), '|';
+			//echo '<img src="/PHPExcel/' . saveImg($key-1) . '" />';
+			//echo $cellIterator[3]->getValue(), '<br />';
 		}
 	}
 }
