@@ -7,10 +7,13 @@ class IssueController extends GlobalController {
 		
 	}
     public function index(){
-		$status_id = I('get.st', 1);
+		$status_id = I('get.st', 0);
 		
 		$IssueEvent = A('Issue', 'Event');
 		$tabs = $IssueEvent->getTabs($this->user['user_type_id']);//print_r($tabs);exit;
+		
+		empty($status_id) && $status_id = $tabs[0]['st'];
+		
 		$tools = $IssueEvent->getPassBtns($status_id, $this->user['user_type_id']);
 		$this->assign('tabs', $tabs);
 		$this->assign('tools', $tools);
@@ -342,7 +345,7 @@ class IssueController extends GlobalController {
 				exit;
 			}
 		}
-		if (!empty($_FILES['attachment'])) {
+		if (!empty($_FILES['attachment']['tmp_name'])) {
 			$file = $_FILES['attachment'];
 			
 			$file_info = $this->_upload2($file, false, 0, 0, 'no_limit');
