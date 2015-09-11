@@ -441,6 +441,26 @@ class IssueController extends GlobalController {
 			}
 			$ExcelEvent = A('Excel', 'Event');
 			$ExcelEvent->export($cols, $rows, '问题导出' . date('Ymd'));
+		}else if ($mode == 'only_img') {
+			$fname = '图片导出' . $this->user['id'] . date('ymdHis') . '.zip';
+			$zip_file = C('DOWNLOAD_DIR') . $fname;
+			$zip_file_gbk = iconv('UTF-8', 'GBK', $zip_file);
+
+			$zip = new \ZipArchive;
+			if (($res = $zip->open($zip_file_gbk, \ZipArchive::OVERWRITE)) !== TRUE)  {
+				exit('create zip file failed. Error code: ' . $res);
+			}
+			foreach($data as $row) {
+				if (empty($row['img']) || !file_exists($row['img'])) continue;
+				
+				$ext = strrchr($row['img'], '.');
+				$new_name = $row['title'] . $ext;
+				$new_name = iconv('UTF-8', 'GBK', $new_name);
+		
+				$zip->addFile($row['img'], $new_name);
+			}
+			$zip->close();
+			header('Location: ' . C('HTTP_SERVER') . $zip_file);
 		}
 	}
 	
