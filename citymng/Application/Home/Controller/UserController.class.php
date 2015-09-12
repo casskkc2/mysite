@@ -148,4 +148,34 @@ class UserController extends GlobalController {
 		
 		$this->ajaxReturn($json);
 	}
+	
+	public function exportHistory() {
+		$filter_date_start = I('get.filter_date_start', '');
+		$filter_date_end = I('get.filter_date_end', '');
+		
+		$cond = array();
+		!empty($filter_date_start) && $cond['a.create_time'] = array('egt', $filter_date_start);
+		!empty($filter_date_end) && $cond['a.create_time'] = array('elt', $filter_date_end . ' 23:59:59');
+		$list = M('LoginHistory')->alias('a')
+			->join('user b ON a.user_id=b.id')
+			->field('a.*, b.username, b.smartphone')
+			->where($cond)
+			->order('a.create_time ASC')
+			->select();
+		$cols = array(
+			'用户名', '电话', '登录时间', '登录IP'
+		);
+		$rows = array();
+		foreach($list as $row) {
+			$rows[] = array(
+				$row['username'], $row['smartphone'], $row['create_time'], $row['ip']
+			);
+		}
+		if (!empty($rows)) {
+			$ExcelEvent = A('Excel', 'Event');
+			$ExcelEvent->export($cols, $rows, '登录记录' . date('YmdHi'), 'login_record');
+		}else {
+			$this->error('没有符合条件的登录记录', 'javascript:window.close();', 3);
+		}
+	}
 }

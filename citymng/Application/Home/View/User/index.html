@@ -2,15 +2,15 @@
 		<div class="box">
 			<div class="content" style="width:715px">
 				<div class="tab" style="text-align:right;">
-					 <a onclick="$('#export_filter').toggle();"><u>导出登录记录</u></a>
+					 <a id="btn_export_toggle"><u>导出登录记录</u></a>
 				 </div>
 				<table class="form" id="export_filter" style="display:none;">
 					<tbody><tr>
-					  <td align="right">日期：
-						从<input type="text" size="12" id="date-start" value="2015-06-01" name="filter_date_start" class="hasDatepicker"> 到 
-						<input type="text" size="12" id="date-end" value="2015-06-30" name="filter_date_end" class="hasDatepicker"></td>
+					  <td align="right">选择日期：
+						从 <input type="text" style="width:100px;" id="filter_date_start" value="" name="filter_date_start" class="easyui-datebox"> 到 
+						<input type="text" style="width:100px;" id="filter_date_end" value="" name="filter_date_end" class="easyui-datebox"></td>
 					  <td>
-					  <a class="button">导出</a> 
+					  <a id="btn_export_history" class="button">导出</a> 
 					  </td>
 					</tr>
 				  </tbody>
@@ -99,5 +99,41 @@
 					$("#user_detail").html(str);
 				}
 			});
+			
+			function getExportFilter() {
+				var url = '';
+	
+				var filter_date_start = $("#filter_date_start").datebox("getValue");
+				if (filter_date_start) {
+					url += '/filter_date_start/' + encodeURIComponent(filter_date_start);
+				}
+
+				var filter_date_end = $("#filter_date_end").datebox("getValue");
+				if (filter_date_end) {
+					url += '/filter_date_end/' + encodeURIComponent(filter_date_end);
+				}
+				
+				return url;
+			}
+			function doExport(mode) {
+				url = ROOT + '/Issue/export/mode/' + mode;
+				url += getExportFilter();
+				window.open(url);
+			}
+		$(function() {
+			$("#btn_export_toggle").click(function() {
+				if ($('#export_filter').css("display") == "none") {
+					$('#export_filter').show();
+				}else {
+					$('#export_filter').hide();
+				}
+			});
+			
+			$("#btn_export_history").click(function() {
+				url = ROOT + '/User/exportHistory';
+				url += getExportFilter();
+				window.open(url);
+			});
+		});
 		</script>
 <include file="Common/footer" />

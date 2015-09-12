@@ -37,6 +37,15 @@ class PublicController extends BaseController {
 			);
 			M('User')->where(array('id'=>$user['id']))->data($data)->save();
 			
+			// save login history
+			$data = array(
+				'user_id'	=> $user['id'],
+				'city_id'	=> $user['city_id'],
+				'create_time'	=> date('Y-m-d H:i:s'),
+				'ip'		=> $_SERVER['REMOTE_ADDR']
+			);
+			M('LoginHistory')->data($data)->add();
+			
 			$change_pwd = false;
 			if ($this->setting['config_change_pwd_alert'] == 1) {
 				if (empty($user['change_pwd_time'])) {

@@ -458,12 +458,12 @@ class IssueController extends GlobalController {
 					$row['id'],
 					$row['area1'],$row['area2'],$row['area3'],$row['area4'],
 					$row['target1'],$row['target2'],$row['target3'],$row['target_code'],
-					$row['title'], $row['date'], $row['time'], $row['weight'], $img_value,
+					$row['title'], $row['date'], $row['time'], $row['weight'], ($mode == 'default' ? $img_value : $row['img']),
 					$row['des']
 				);
 			}
 			$ExcelEvent = A('Excel', 'Event');
-			$ExcelEvent->export($cols, $rows, '问题导出' . date('YmdHi'));
+			$ExcelEvent->export($cols, $rows, '问题导出' . date('YmdHi'), 'issue_' . $mode);
 		}else if ($mode == 'only_img') {
 			$num = 0;
 			foreach($data as $row) {
