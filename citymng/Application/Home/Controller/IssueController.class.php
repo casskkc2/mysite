@@ -405,6 +405,22 @@ class IssueController extends GlobalController {
 		}
 	}
 	
+	public function doprint() {
+		$id = I('get.id', 0);
+		if(empty($id)) $this->error('参数错误');
+		
+		$IssueEvent = A('Issue', 'Event');
+		$info = $IssueEvent->getIssueDetail($id);
+		$this->assign('info', $info);
+		
+		$reply_list = $IssueEvent->getReplyList($id,'text');
+		$attachment_list = $IssueEvent->getReplyList($id,'attachment');//dump($attachment_list);exit;
+		$this->assign('reply_list', $reply_list);
+		$this->assign('attachment_list', $attachment_list);
+		
+		$this->display();
+	}
+	
 	public function export() {
 		$mode = I('get.mode', 'default');
 		$status = I('get.status', 0);
@@ -423,9 +439,11 @@ class IssueController extends GlobalController {
 		$data = $res['data'];
 		
 		$cols = array(
+			'编号',
 			'区', '类别', '街', '路',
 			'一级指标', '二级指标', '三级指标', '指标代码',
-			'标题', '检查日期', '检查时间', '计数', '图片'
+			'标题', '检查日期', '检查时间', '计数', '图片',
+			'详细描述'
 		);
 		
 		if ($mode == 'default' || $mode == 'with_img') {
@@ -437,14 +455,26 @@ class IssueController extends GlobalController {
 				!empty($img) && $img_value = array('text'=>$img, 'url'=>$img);
 				
 				$rows[] = array(
+					$row['id'],
 					$row['area1'],$row['area2'],$row['area3'],$row['area4'],
 					$row['target1'],$row['target2'],$row['target3'],$row['target_code'],
-					$row['title'], $row['date'], $row['time'], $row['weight'], $img_value
+					$row['title'], $row['date'], $row['time'], $row['weight'], $img_value,
+					$row['des']
 				);
 			}
 			$ExcelEvent = A('Excel', 'Event');
-			$ExcelEvent->export($cols, $rows, '问题导出' . date('Ymd'));
+			$ExcelEvent->export($cols, $rows, '问题导出' . date('YmdHi'));
 		}else if ($mode == 'only_img') {
+			$num = 0;
+			foreach($data as $row) {
+				if (empty($row['img']) || !file_exists($row['img'])) continue;
+				$num++;
+			}
+			if ($num == 0) {
+				header('Content-Type: text/html;charset=utf-8');
+				exit('没有符合条件的图片');
+			}
+			
 			$fname = '图片导出' . $this->user['id'] . date('ymdHis') . '.zip';
 			$zip_file = C('DOWNLOAD_DIR') . $fname;
 			$zip_file_gbk = iconv('UTF-8', 'GBK', $zip_file);
@@ -468,40 +498,28 @@ class IssueController extends GlobalController {
 	}
 	
 	public function importIssues() {
-		header('Content-Type: text/html;charset=UTF-8');
-		import('Vendor.PHPExcel.Classes.PHPExcel.IOFactory', '', '.php');
-		//require_once dirname(__FILE__) . '/Classes/PHPExcel/IOFactory.php';
-
-		$inputFileName = "test1.xlsx";
-
-		/**  Identify the type of $inputFileName  **/
-		$inputFileType = \PHPExcel_IOFactory::identify($inputFileName);
-		//echo 'Loading ' , $inputFileName , ' using ' , $inputFileType , " Reader" , PHP_EOL;
-
-		/**  Create a new Reader of the type that has been identified  **/
-		$objReader = \PHPExcel_IOFactory::createReader($inputFileType);
-		/**  Load $inputFileName to a PHPExcel Object  **/
-		$objReader->setReadDataOnly(true);
-		$objPHPExcel = $objReader->load($inputFileName);
-
-		$workSheet = $objPHPExcel->getActiveSheet();
-
-		foreach($workSheet->getRowIterator() as $key=>$row) {
-			//echo $key,'<br />';
-			if($key < 2) continue;
-			$cellIterator = $row->getCellIterator();
-			$cellIterator->setIterateOnlyExistingCells(false);// This loops all cells, even if it is not set. By default, only cells that are set will be iterated.
-			foreach($cellIterator as $k=>$cell) {
-				if($k == 0) echo $cell->getValue();
-				else if ($k == 1) echo $cell->getValue();
-				else echo '|', $cell->getValue();
+		//echo $_SERVER['REQUEST_METHOD'];exit;
+		if (strtoupper($_SERVER['REQUEST_METHOD']) == 'POST') {
+			$error = '';
 				
+			$file = $_FILES['file'];
+			$file_info = $this->_upload2($file, false, 0, 0, 'xls|xlsx');
+			if (is_array($file_info)) { // upload successfully
+				$fpath = $file_info['file_path'];
+				
+				// todo
+				$ExcelEvent = A('Excel', 'Event');
+				$res = $ExcelEvent->importIssue($fpath, $this->user, $this->city);
+				$this->assign('res', $res);
+				@unlink($fpath);
+			}else {
+				$error = $file_info;
 			}
-			echo '<br />';
-			//echo $cellIterator[0]->getValue(), '|';
-			//echo $cellIterator[1]->getValue(), '|';
-			//echo '<img src="/PHPExcel/' . saveImg($key-1) . '" />';
-			//echo $cellIterator[3]->getValue(), '<br />';
+			
+			$this->assign('error', $error);
+			$this->display('Issue:importResult');exit;
 		}
+		$this->assign('title', '批量上报');
+		$this->display();
 	}
 }

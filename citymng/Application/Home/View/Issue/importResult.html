@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh" xml:lang="zh">
+<head>
+<title>{$title}</title>
+<base href="" />
+<meta content="text/html; charset=utf-8" http-equiv="content-type" />
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/stylesheet/style.css" />
+<style type="text/css">
+table {
+	width: 880px;
+}
+img {
+	max-width:780px;
+}
+</style>
+</head>
+
+<body>
+<div class="box">
+	<div class="content" style="padding:0; border:0;height:100%;width:100%;min-height:400px;">
+	<notempty name="error">
+	<span class="error">{$error}</span>
+	<else />
+	共上传 {$res.total} 条数据。成功 {$res.success_num} 条，失败 <span class="error">{$res.fail_num}</span> 条。<br />
+	<volist name="res['fails']" id="vo">
+	第 {$vo.seq} 行数据上传失败。错误原因: <span class="error">{$vo.error}。</span><br />
+	</volist>
+	</notempty>
+	
+	</div>
+</div>
+</body>
+</html>

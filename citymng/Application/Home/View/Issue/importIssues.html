@@ -1,0 +1,36 @@
+<include file="Common/header" />
+<link href="__PUBLIC__/javascript/jqueryValidate/css/cmxform.css" rel="stylesheet" type="text/css" />
+<script src="__PUBLIC__/javascript/jqueryValidate/jquery.validate.js"></script>
+<script src="__PUBLIC__/javascript/jqueryValidate/jquery.metadata.js"></script>
+		<div class="box">
+			<div class="content" style="width:1002px">
+			<form id="formSubmit" action="__SELF__" method="POST" enctype="multipart/form-data" target="hiddenTarget">
+				<table class="form2">
+					<tbody>
+					<tr>
+					  <td align="right">选择要上传的Excel(.xls,.xlsx)文件：</td>
+					  <td align="left">
+						<div style="float:left;" class=""><input type="file" id="file" name="file" data-rule-required="true" data-msg-required="请选择要上传的文件" /></div>
+					  </td>
+					  <td><a id="btn_submit" class="button">提交</a></td>
+					</tr>
+					<tr>
+					  <td colspan="3">
+					  <iframe name="hiddenTarget" width="100%" height="400" frameborder="no" ></iframe>
+					  </td>
+					</tr>
+				  </tbody>
+				 </table>
+			</form>
+			</div>
+		</div>
+		<script type="text/javascript">
+			$(function() {
+				$("#btn_submit").click(function(){
+					$("#formSubmit").submit();            
+				});
+				
+				$("#formSubmit").validate();
+			});
+		</script>
+<include file="Common/footer" />

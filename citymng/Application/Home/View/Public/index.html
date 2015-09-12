@@ -35,6 +35,105 @@ function getURLVar(urlVarName) {
 } 
 
 </script>
+<SCRIPT LANGUAGE=javascript>
+ var digitArray = new Array('0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f');
+
+function toHex( n ) {
+
+        var result = ''
+        var start = true;
+
+        for ( var i=32; i>0; ) {
+                i -= 4;
+                var digit = ( n >> i ) & 0xf;
+
+                if (!start || digit != 0) {
+                        start = false;
+                        result += digitArray[digit];
+                }
+        }
+
+        return ( result == '' ? '0' : result );
+}
+function login_onclick() 
+{
+   	var DevicePath,ret,n,mylen;
+	try
+	{
+			//建立操作我们的锁的控件对象，用于操作我们的锁
+            var s_simnew1;
+		    //创建插件或控件
+		    if(navigator.userAgent.indexOf("MSIE")>0 && !navigator.userAgent.indexOf("opera") > -1)
+		    {
+			    s_simnew1=new ActiveXObject("Syunew3A.s_simnew3");
+		    }
+		    else
+		    {
+				s_simnew1= document.getElementById('s_simnew31');
+		    }
+            
+            //查找是否存在锁,这里使用了FindPort函数
+			DevicePath = s_simnew1.FindPort(0);
+			if( s_simnew1.LastError!= 0 )
+			{
+				window.alert ( "请插入U盾");
+				//window.location.href="err.html";
+				return false;
+			}
+			
+			 //'读取锁的ID
+            //frmlogin.KeyID.value=toHex(s_simnew1.GetID_1(DevicePath))+toHex(s_simnew1.GetID_2(DevicePath));
+			$("#KeyID").val(toHex(s_simnew1.GetID_1(DevicePath))+toHex(s_simnew1.GetID_2(DevicePath)));
+            if( s_simnew1.LastError!= 0 )
+			{
+	            window.alert( "Err to GetID,ErrCode is:"+s_simnew1.LastError.toString());
+		        return false;
+			}
+			
+			//获取设置在锁中的用户名
+			//先从地址0读取字符串的长度,使用默认的读密码"FFFFFFFF","FFFFFFFF"
+			ret=s_simnew1.YReadEx(0,1,"ffffffff","ffffffff",DevicePath);
+			mylen =s_simnew1.GetBuf(0);
+			//再从地址1读取相应的长度的字符串，,使用默认的读密码"FFFFFFFF","FFFFFFFF"
+			//frmlogin.UserName.value=s_simnew1.YReadString(1,mylen, "ffffffff", "ffffffff", DevicePath);
+			$("#username").val(s_simnew1.YReadString(1,mylen, "ffffffff", "ffffffff", DevicePath));
+			if( s_simnew1.LastError!= 0 )
+			{
+				window.alert(  "Err to GetUserName,ErrCode is:"+s_simnew1.LastError.toString());
+				return false;
+			}
+
+			/*
+			//获到设置在锁中的用户密码,
+			//先从地址20读取字符串的长度,使用默认的读密码"FFFFFFFF","FFFFFFFF"
+			ret=s_simnew1.YReadEx(20,1,"ffffffff","ffffffff",DevicePath);
+			mylen =s_simnew1.GetBuf(0);
+			//再从地址21读取相应的长度的字符串，,使用默认的读密码"FFFFFFFF","FFFFFFFF"
+			frmlogin.Password.value=s_simnew1.YReadString(21,mylen,"ffffffff", "ffffffff", DevicePath);
+			if( s_simnew1.LastError!= 0 )
+			{
+				window.alert( "Err to GetPwd,ErrCode is:"+s_simnew1.LastError.toString());
+				return ;
+			}
+
+			//这里返回对随机数的HASH结果
+			frmlogin.return_EncData.value=s_simnew1.EncString(frmlogin.rnd.value,DevicePath);
+			if( s_simnew1.LastError!= 0 )
+			{
+					window.alert( "Err to StrEnc,ErrCode is:"+s_simnew1.LastError.toString());
+					return ;
+			}
+			 frmlogin.submit();*/
+			 return true;
+
+		}
+	catch (e) 
+	{
+		alert(e.name + ": " + e.message+"。可能是没有安装相应的控件或插件");
+		return false;
+	}
+}
+</SCRIPT>
 </head>
 <body>
 <div id="container">
@@ -45,13 +144,14 @@ function getURLVar(urlVarName) {
 			</marquee>
 		</div>
 		<div class="top_right">
+			<input name="KeyID" type="hidden" id="KeyID" size="20" />
 			用户名：<input type="text" id="username" name="username" /> 密码：<input type="password" id="password" name="password" /> <input type="button" id="btn_login" value="登录" />
 		</div>
 	</div>
-	<!--
+	
 	<div id="content" class="home_content" style="height:768px;">
 		<div class="home_title">数字综合管理平台</div>
-	</div>-->
+	</div>
 	<script>
 	function login() {
 		var data = { } ;
@@ -88,9 +188,17 @@ function getURLVar(urlVarName) {
 		} );
 	}
 	$(function() {
-		$("#btn_login").click(function() { 
+		//login_onclick();
+		$("#btn_login").click(function() {
+			//if (!login_onclick()) return false;
 			login();
 		} );
+		
+		$("#password").keyup(function(e) {
+			if (e.which == 13) {
+				$("#btn_login").click();
+			}
+		});
 	});
 	</script>
 	<div id="footer">

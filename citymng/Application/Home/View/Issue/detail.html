@@ -1,7 +1,7 @@
 	<table class="detail" cellspacing="1" cellpadding="5">
 		<if condition="!empty($info['img'])">
 		<tr>
-			<td colspan="2"><a href="{$info.img}" target="_blank" title="点击查看大图"><img src="{$info.img}" width="249" /></a></td>
+			<td colspan="2"><a href="{$info.img}" target="_blank" title="点击查看大图"><img src="{$info.img}" width="239" /></a></td>
 		</tr>
 		</if>
 		<tr>
@@ -21,6 +21,10 @@
 			<td>{$info.target_text}</td>
 		</tr>
 		<tr>
+			<td>计数</td>
+			<td>{$info.weight}</td>
+		</tr>
+		<tr>
 			<td>标题</td>
 			<td>{$info.title}</td>
 		</tr>
@@ -34,8 +38,9 @@
 		</tr>
 	</table>
 	<br />
-	<if condition="!empty($can_edit)">
 	<div style="text-align:right;">
+	<if condition="!empty($can_edit)">
 	<a class="button" href="__CONTROLLER__/edit/id/{$info.id}">编辑</a>
-	</div>
 	</if>
+	<a class="button" href="__CONTROLLER__/doprint/id/{$info.id}" target="_blank">打印</a>
+	</div>

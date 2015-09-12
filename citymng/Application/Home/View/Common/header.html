@@ -41,7 +41,7 @@ var ROOT = "__MODULE__";
 </head>
 <body>
 <div id="container">
-<!--
+
 	<div id="top">
 		<div class="top_left">
 		<marquee width="600px" height="28px" direction="left" scrollamount="3"           onmouseover="this.stop()" onmouseout="this.start()">
@@ -56,7 +56,11 @@ var ROOT = "__MODULE__";
 		<div class="header_title">数字综合管理平台</div>
 		<div class="nav">
 			<ul>
-				<li><a href="#">问题管理</a></li>
+				<li><a href="__MODULE__/Issue">问题管理</a></li>
+				<if condition="in_array($current_user['user_type_id'], array(11, 10))">
+				<li><a href="__MODULE__/Issue/add">问题上报</a></li>
+				<li><a href="__MODULE__/Issue/importIssues">批量上报</a></li>
+				</if>
 				<if condition="$current_user['user_type_id'] eq 10">
 				<li><a href="__MODULE__/Area">区域维护</a></li>
 				<li><a href="__MODULE__/Target">代码指标维护</a></li>
@@ -65,7 +69,7 @@ var ROOT = "__MODULE__";
 				
 			</ul>
 		</div>
-	</div>-->
+	</div>
 	<div id="content" class="main_content">
 		<!--<div id="notice">
 			<div>

@@ -85,6 +85,8 @@ class GlobalController extends BaseController {
 		);
 		if ($exts === 'no_limit') {
 			$config['exts'] = '';
+		}else if (!empty($exts)) {
+			$config['exts'] = explode('|',strtolower($exts));
 		}
 		$upload = new \Think\Upload($config);
 		

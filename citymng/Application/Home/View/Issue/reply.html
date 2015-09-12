@@ -1,4 +1,4 @@
-	<table class="detail" cellspacing="1" cellpadding="5" width="259">
+	<table class="detail" cellspacing="1" cellpadding="5" width="249">
 		<volist name="reply_list" id="vo">
 		<tr>
 			<td align="right" style="background:#fff;">{$vo.username}于{$vo.create_time}</td>
@@ -11,7 +11,7 @@
 	</table>
 	<br />
 	<div>附件：</div>
-	<table class="detail" cellspacing="1" cellpadding="5" width="259">
+	<table class="detail" cellspacing="1" cellpadding="5" width="249">
 		<volist name="attachment_list" id="vo">
 		<!--<tr>
 			<td align="right">{$vo.username}上传于{$vo.create_time}</td>
@@ -27,7 +27,7 @@
 	<if condition="$can_reply eq true">
 	<form id="replyForm" method="post" enctype="multipart/form-data" action="__CONTROLLER__/reply" target="replyFormTarget">
 	<input type="hidden" name="id" value="{$info.id}" />
-	<table class="detail" cellspacing="1" cellpadding="5" width="259">
+	<table class="detail" cellspacing="1" cellpadding="5" width="249">
 		<if condition="$status_operations['code'] lt 3">
 		<tr>
 			<td>操作</td>

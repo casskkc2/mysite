@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh" xml:lang="zh">
+<head>
+<title>{$title}</title>
+<base href="" />
+<meta content="text/html; charset=utf-8" http-equiv="content-type" />
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/stylesheet/style.css" />
+<style type="text/css">
+table {
+	width: 880px;
+}
+img {
+	max-width:780px;
+}
+</style>
+</head>
+
+<body>
+<div style="margin:auto; width:880px;">
+	<div style="width:100%; margin:20px 0 10px; font-size:14px; text-align:center;">
+		<a href="javascript:window.print();" >[打印]</a>&nbsp;&nbsp;
+		<a href="javascript:window.close();" >[关闭]</a>
+	</div>
+	<table class="detail" cellspacing="1" cellpadding="5">
+		<if condition="!empty($info['img'])">
+		<tr>
+			<td colspan="2" align="center"><a href="{$info.img}" target="_blank" title="点击查看大图"><img src="{$info.img}" /></a></td>
+		</tr>
+		</if>
+		<tr>
+			<td style="width:80px;">编号</td>
+			<td>{$info.id}</td>
+		</tr>
+		<tr>
+			<td>区域街道</td>
+			<td>{$info.area_text}</td>
+		</tr>
+		<tr>
+			<td>指标代码</td>
+			<td>{$info.target_code}</td>
+		</tr>
+		<tr>
+			<td>指标名称</td>
+			<td>{$info.target_text}</td>
+		</tr>
+		<tr>
+			<td>计数</td>
+			<td>{$info.weight}</td>
+		</tr>
+		<tr>
+			<td>标题</td>
+			<td>{$info.title}</td>
+		</tr>
+		<tr>
+			<td>检查日期</td>
+			<td>{$info.date}</td>
+		</tr>
+		<tr>
+			<td>状态</td>
+			<td>{$info.status_name}</td>
+		</tr>
+	</table>
+	<br />
+	<div>回复：<if condition="count($reply_list) eq 0">暂无回复</if></div>
+	<table class="detail" cellspacing="1" cellpadding="5" width="259">
+		<volist name="reply_list" id="vo">
+		<tr>
+			<td align="right" style="background:#fff;">{$vo.username}于{$vo.create_time}</td>
+		</tr>
+		<tr>
+			<td>{$vo.text}</td>
+		</tr>
+		</volist>
+		
+	</table>
+	<br />
+	<div>附件：</div>
+	<table class="detail" cellspacing="1" cellpadding="5" width="259">
+		<volist name="attachment_list" id="vo">
+		<!--<tr>
+			<td align="right">{$vo.username}上传于{$vo.create_time}</td>
+		</tr>-->
+		<tr>
+			<if condition="$vo['is_img'] eq 1">
+			<td align="center">
+				<img src="{$vo.path}" />
+			</td>
+			<else />
+			<td>
+				<a href="{$vo.path}" target="_blank">{$vo.fname}</a>
+			</td>
+			</if>
+			</td>
+		</tr>
+		</volist>
+		
+	</table>
+	<div style="width:100%; margin:10px 0 20px; font-size:14px; text-align:center;">
+		<a href="javascript:window.print();" >[打印]</a>&nbsp;&nbsp;
+		<a href="javascript:window.close();" >[关闭]</a>
+	</div>
+</div>
+</body>
