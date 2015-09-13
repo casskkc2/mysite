@@ -1,0 +1,300 @@
+<include file="Common/header" />
+<style type="text/css">
+table.form2 > tbody > tr > td:first-child {
+    width: 100px;
+}
+</style>
+		<div class="box">
+			<div id="searchDiv" class="content" style="width:715px;min-height:525px;">
+				<table class="form2">
+					<tbody id="searchBody">
+					<tr>
+						<td width="100">编号</td>
+						<td><input type="text" id="issue_id" name="issue_id" size="20" /></td>
+					</tr>
+					<tr>
+					  <td align="">区域：</td>
+					  <td align="left">
+						<select id="area_0">
+						<option value="0">--请选择--</option>
+						<volist name="area_list" id="vo">
+							<option value="{$vo.id}">{$vo.name}</option>
+						</volist>
+						</select>
+						<input type="hidden" id="area_name_0" name="area_name[]" />
+					  </td>
+					</tr>
+					<tr>
+					  <td align="">指标：</td>
+					  <td align="left">
+						<select id="target_0">
+						<option value="0">--请选择--</option>
+						<volist name="target_list" id="vo">
+							<option value="{$vo.id}">{$vo.name}</option>
+						</volist>
+						</select>
+						<input type="hidden" id="target_name_0" name="target_name[]" />
+					  </td>
+					</tr>
+					<tr>
+					  <td align="left">检查日期：</td>
+					  <td align="left">
+					  <input type="text" size="16" id="filter_date_start" value="" name="filter_date_start" class="easyui-datebox"> 到 
+						<input type="text" size="16" id="filter_date_end" value="" name="filter_date_end" class="easyui-datebox">
+					  </td>
+					</tr>
+					<tr>
+					  <td align="">审核状态：</td>
+					  <td align="left">
+						<select id="status_id">
+						<option value="0">--请选择--</option>
+						<volist name="status_list" id="vo">
+							<option value="{$vo.status_id}">{$vo.name}</option>
+						</volist>
+						</select>
+					  </td>
+					</tr>
+					<tr>
+						<td></td>
+						<td>
+						<a id="btn_search" class="button">搜索</a> 
+						<a class="searchExpand" onclick="$('#searchBody').hide();$('#expandBody').show();"><b class="arrow arrow_up"></b>收起</a>
+						</td>
+					</tr>
+				  </tbody>
+				  <tbody id="expandBody" style="display:none;">
+					<tr>
+						<td></td>
+						<td>
+							<a class="searchExpand" onclick="$('#searchBody').show();$('#expandBody').hide();"><b class="arrow arrow_down"></b>展开</a>
+						</td>
+					</tr>
+				  </tbody>
+				 </table>
+				 
+				<table id="tb" style="width:710px;">
+				</table>
+				
+			</div>
+			
+			<div class="content" style="width:281px;margin-left:4px;padding:0;height:545px;">
+			    <div id="aa" class="easyui-accordion" fit="true">
+					<div id="issue_detail" title="问题详情" data-options="selected:true" style="overflow:auto;padding:10px;">
+						
+					</div>
+					<div id="issue_reply" title="问题回复" data-options="" style="padding:10px;">
+						
+					</div>
+					<div title="地图位置">
+						
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			
+		</script>
+		<script type="text/javascript">	
+			var grid_shown = false;
+			$(function() {
+				$("#btn_search").click(function() {
+					var start_date = $("#filter_date_start").datebox("getValue");
+					var end_date = $("#filter_date_end").datebox("getValue");
+					var issue_id = $("#issue_id").val();
+					var status_id = $("#status_id").val();
+					
+					var params = {length:0};
+					if (start_date != "") {
+						params.start_date = start_date;
+						params.length += 1;
+					}
+					if (end_date != "") {
+						params.end_date = end_date;
+						params.length += 1;
+					}
+					if (issue_id != "") {
+						params.id = issue_id;
+						params.length += 1;
+					}
+					if (status_id != 0) {
+						params.status_id = status_id;
+						params.length += 1;
+					}
+					
+					var obj = $("[name=area_id]").eq(0);
+					var area_id = obj.val();
+					if (area_id == 0) {
+						var area_names = $("input[name='area_name[]']").map(function() {
+							if($(this).val() != '') 
+								return $(this).val();
+						}).get();
+						//alert(area_names);
+						if (area_names.length > 0) {
+							params.area_names = area_names.join();
+							params.length += 1;
+						}
+					}else {
+						params.area_id = area_id;
+						params.length += 1;
+					}
+					
+					var obj = $("[name=target_id]").eq(0);
+					var target_id = obj.val();
+					if (target_id == 0) {
+						var target_names = $("input[name='target_name[]']").map(function() {
+							if($(this).val() != '') 
+								return $(this).val();
+						}).get();
+						//alert(target_names);
+						if (target_names.length > 0) {
+							params.target_names = target_names.join();
+							params.length += 1;
+						}
+					}else {
+						params.target_id = target_id;
+						params.length += 1;
+					}
+					
+					
+					var str = '';
+					for(var k in params) {
+						str += k + ':' + params[k] + '\n';
+					}
+					//alert(str);//return false;
+					
+					if (params.length == 0) {
+						alert('请选择查询条件');
+						return false;
+					}
+					delete params["length"];
+					if (!grid_shown) {
+						loadGrid(params);
+						grid_shown = true;
+					}else {
+						$("#tb").datagrid("load", params);
+					}
+				});
+				
+				$("#searchDiv").on("change", "select[id^=area_]", function() {
+					var c_a_id = $(this).val();	
+					
+					var i = $(this).attr("id").split("_")[1];
+					
+					//alert( $("option:selected", $(this)).text() );
+					if (c_a_id != 0) {
+						$("#area_name_" + i).val($("option:selected", $(this)).text());
+					}else {
+						$("#area_name_" + i).val("");
+					}
+					var new_i = parseInt(i) + 1; //alert(new_i);
+					
+					getAreaList(c_a_id, 0, function(html) {
+						if (html != '') {
+							$("#area_" + i).attr("name", "");
+							if ( $("#area_" + new_i).length == 0 ) {
+								$("#area_name_" + i).after('&nbsp;<select id="area_' + new_i + '"></select><input type="hidden" id="area_name_' + new_i + '" name="area_name[]" />');
+							}
+							$("#area_" + new_i).html(html).change();
+						}else {
+							$("#area_" + i).attr("name", "area_id");
+							$("select[id^=area_]").each(function(index) {
+								var j = $(this).attr("id").split("_")[1]; //alert(j + '?' + i);
+								if (j > i) {
+									$(this).remove();
+									$("#area_name_" + j).remove();
+								}
+							});
+						}
+					});
+				});
+				$("#area_0").change();
+				
+				$("#searchDiv").on("change", "select[id^=target_]", function() {
+					var c_a_id = $(this).val();
+					
+					var i = $(this).attr("id").split("_")[1];
+					
+					//alert( $("option:selected", $(this)).text() );
+					if (c_a_id != 0) {
+						$("#target_name_" + i).val($("option:selected", $(this)).text());
+					}else {
+						$("#target_name_" + i).val("");
+					}
+					var new_i = parseInt(i) + 1; //alert(new_i);
+					
+					getTargetList(c_a_id, 0, function(html) {
+						if (html != '') {
+							$("#target_" + i).attr("name", "");
+							if ( $("#target_" + new_i).length == 0 ) {
+								$("#target_name_" + i).after('&nbsp;<select id="target_' + new_i + '"></select><input type="hidden" id="target_name_' + new_i + '" name="target_name[]" />');
+							}
+							$("#target_" + new_i).html(html).change();
+						}else {
+							$("#target_" + i).attr("name", "target_id");
+							$("select[id^=target_]").each(function(index) {
+								var j = $(this).attr("id").split("_")[1]; //alert(j + '?' + i);
+								if (j > i) {
+									$(this).remove();
+									$("#target_name_" + j).remove();
+								}
+							});
+						}
+					});
+				});
+				$("#target_0").change();
+			});
+			
+			function loadGrid(params) {
+				$("#tb").datagrid({
+					url: ROOT + '/Issue/advancedSearch',
+					fit: false,
+					border: false,
+					striped: true,
+					height: 400,
+					//sortName: 'id',
+					//sortOrder: 'asc',
+					pagination: true,
+					pagePosition: 'bottom',
+					pageSize: 20,
+					singleSelect: true,
+					checkOnSelect: true,
+					pageList: [20, 40, 60, 80],
+					queryParams: params,
+					//fitColumns: true,
+					//toolbar: toolbar,
+					columns:[[
+						//{field:'aid',title:'', checkbox:true},
+						{field:'id',title:'编号', width:50},
+						{field:'area1',title:'区域',width:80},
+						{field:'title',title:'标题',width:310},
+						{field:'date',title:'检查日期',width:80},
+						{field:'time',title:'检查时间',width:80},
+						{field:'weight',title:'计数',width:80}
+					]],
+					onLoadError: function(data) {
+						alert(data.responseText);
+					},
+					onClickRow: function(index, row) {
+						detail(row.id);
+					}
+				});
+			}
+			
+			function detail(id) {
+				var data = {id: id, from: 'list_page'};
+				$.ajax({
+					url: ROOT + "/Issue/detail",
+					type: "post",
+					data: data,
+					dataType: 'json',
+					success: function(res) {
+						$("#issue_detail").html(res.detail);
+						$("#issue_reply").html(res.reply);
+					},
+					error: function(xhr, ajaxOptions, thrownError) {
+						alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+					}
+				});
+			}
+		</script>
+<include file="Common/footer" />
