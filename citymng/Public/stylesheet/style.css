@@ -205,6 +205,31 @@ a.button {
 	color:#666;
 }
 
+.searchExpand {
+	display:block;
+	float:right; 
+	position:relative;
+	width:31px;
+	padding-right:14px;
+	height:20px;
+	line-height:20px;
+	font-size:14px;
+}
+.arrow {
+	height: 5px;
+    overflow: hidden;
+    position: absolute;
+    right: 5px;
+    top: 9px;
+    width: 7px;
+}
+.arrow_up {
+	background: url("../image/arrow_up.gif") no-repeat;
+}
+.arrow_down {
+	background: url("../image/arrow_down.gif") no-repeat;
+}
+
 #footer {
 	height: 30px;
 	text-align: center;

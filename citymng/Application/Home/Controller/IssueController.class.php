@@ -244,6 +244,70 @@ class IssueController extends GlobalController {
 		$this->display('Issue/add');
 	}
 	
+	public function advancedSearch() {
+		if (strtoupper($_SERVER['REQUEST_METHOD']) == 'POST') {
+			$data = array();
+			$data['page'] = I('post.page', 1);
+			$data['rows'] = I('post.rows', 20);
+			$data['sort'] = I('post.sort', 'id');
+			$data['order_by'] = I('post.order', 'ASC');
+			
+			$data['city_id'] = $this->city['city_id'];
+			$data['advance'] = true;
+			
+			$id = I('post.id', 0);
+			$status_id = I('post.status_id', 0);
+			$area_id = I('post.area_id', 0);
+			$target_id = I('post.target_id', 0);
+			$area_names = I('post.area_names', '');
+			$target_names = I('post.target_names', '');
+			$start_date = I('post.start_date', '');
+			$end_date = I('post.end_date', '');
+			!empty($id) && $data['id'] = $id;
+			!empty($status_id) && $data['status_id'] = $status_id;
+			!empty($start_date) && $data['exm_start_date'] = $start_date;
+			!empty($end_date) && $data['exm_end_date'] = $end_date;
+			
+			if (!empty($area_id)) {
+				$data['area_id'] = $area_id;
+			}else if (!empty($area_names)) {
+				$arr = explode(',', $area_names);
+				foreach($arr as $k=>$v) {
+					$data['area' . ($k+1)] = $v;
+				}
+			}
+			
+			if (!empty($target_id)) {
+				$data['target_id'] = $target_id;
+			}else if (!empty($target_names)) {
+				$arr = explode(',', $target_names);
+				foreach($arr as $k=>$v) {
+					$data['target' . ($k+1)] = $v;
+				}
+			}
+			//print_r($data);exit;
+			$IssueEvent = A('Issue', 'Event');
+			
+			$res = $IssueEvent->getIssueList($data);
+				
+			echo $this->generateDataForDataGrid($res['total'], $res['data']);
+			exit;
+		}
+		$AreaEvent = A('Area', 'Event');
+		$area_list = $AreaEvent->getAreaList($this->city['city_id'], 0);
+		$this->assign('area_list', $area_list);
+		
+		$TargetEvent = A('Target', 'Event');
+		$target_list = $TargetEvent->getTargetList($this->city['city_id'], 0);
+		$this->assign('target_list', $target_list);
+		
+		$status_list = M('IssueStatus')->select();
+		$this->assign('status_list', $status_list);
+		
+		$this->assign('title', '高级搜索');
+		$this->display('Issue:search');
+	}
+	
 	public function jsondata() {
 		$data = array();
 		$data['page'] = I('post.page', 1);
