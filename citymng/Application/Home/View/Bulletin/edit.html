@@ -1,0 +1,34 @@
+<include file="Common/header" />
+<link href="__PUBLIC__/javascript/jqueryValidate/css/cmxform.css" rel="stylesheet" type="text/css" />
+<script src="__PUBLIC__/javascript/jqueryValidate/jquery.validate.js"></script>
+<script src="__PUBLIC__/javascript/jqueryValidate/jquery.metadata.js"></script>
+		<div class="box">
+			<div class="content" style="width:1002px">
+			<form id="formSubmit" action="__SELF__" method="POST">
+				<table class="form2">
+					<tbody>
+					<tr>
+					  <td align="right">公告内容：</td>
+					  <td align="left">
+						<textarea name="content" cols="50" rows="5">{$info.content}</textarea>
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right"></td>
+					  <td align="left">
+						<a id="btn_submit" class="button">提交</a>
+					  </td>
+					</tr>
+				  </tbody>
+				 </table>
+			</form>
+			</div>
+		</div>
+		<script type="text/javascript">
+			$(function() {
+				$("#btn_submit").click(function(){
+					$("#formSubmit").submit();            
+				});
+			});
+		</script>
+<include file="Common/footer" />

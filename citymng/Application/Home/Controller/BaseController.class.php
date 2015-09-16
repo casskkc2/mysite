@@ -13,6 +13,11 @@ class BaseController extends Controller {
 				$this->setting[$row['key']] = $row['value'];
 			}
 		}
+		
+		$bulletin = M('Bulletin')->find();
+		if (!empty($bulletin)) {
+			$this->assign('bulletin', $bulletin['content']);
+		}
 	}
 	
 	protected function generateDataForDataGrid($total, $data) {
