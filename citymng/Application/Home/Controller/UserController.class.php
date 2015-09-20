@@ -178,4 +178,26 @@ class UserController extends GlobalController {
 			$this->error('没有符合条件的登录记录', 'javascript:window.close();', 3);
 		}
 	}
+	
+	public function gps() {
+		$res = array();
+		$id = I('post.id', 0);
+		if (empty($id)) $this->ajaxReturn($res);
+		
+		$cond = array(
+			'user_id' => $id,
+			'create_time' => array('egt', date('Y-m-d', strtotime('-1 day')))
+		);
+		$list = M('UserGps')
+			->where($cond)
+			->order('create_time ASC')
+			->select();
+		foreach($list as $row) {
+			if (!empty($row['lat']) && !empty($row['lng'])) {
+				$res[] = $row;
+			}
+		}
+		
+		$this->ajaxReturn($res);
+	}
 }

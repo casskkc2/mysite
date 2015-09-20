@@ -29,13 +29,16 @@
 						
 						
 					</div>
-					<div title="地图位置">
-						
+					<div title="地图位置" style="padding:5px;">
+						<div id="allmap" style="overflow:hidden;margin:0;width:265px;height:400px;"></div>
 					</div>
 				</div>
 			</div>
 		</div>
+		<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=33FqAaSCIdSeYDQOVXYoV4f5"></script>
 		<script type="text/javascript">
+			var current_city = "{$current_city.city}";
+			var pos_list = [];
 			$("#user_tb").datagrid({
 				url: ROOT + '/User/jsondata',
 				fit: true,
@@ -97,8 +100,88 @@
 					str +=	'</tr>';
 					str +=	'</table>';
 					$("#user_detail").html(str);
+					
+					getUserGps(row.id);
 				}
 			});
+			
+			$("#aa").accordion({
+				onSelect: function(title, index) {
+					if (index == 1) {
+						addMap(pos_list);
+					}
+				}
+			});
+			
+			function getUserGps(id) {
+				var data = {id: id};
+				$.ajax({
+					url: ROOT + "/User/gps",
+					type: "post",
+					data: data,
+					dataType: 'json',
+					success: function(res) {
+						pos_list = res;
+						addMap(pos_list);
+					},
+					error: function(xhr, ajaxOptions, thrownError) {
+						alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+					}
+				});
+			}
+			
+			function addMap(pos_list) {
+				// 百度地图API功能
+				var map = new BMap.Map("allmap");
+				
+				if (pos_list.length == 0) {
+					// 创建地址解析器实例
+					var myGeo = new BMap.Geocoder();
+					// 将地址解析结果显示在地图上,并调整地图视野
+					myGeo.getPoint(current_city, function(point){
+						if (point) {
+							map.centerAndZoom(point, 16);
+						}else{
+							alert("地址没有解析到结果!");
+							var point = new BMap.Point(116.404, 39.915); // Beijing
+							map.centerAndZoom(point, 15);
+						}
+					}, current_city);
+				}
+				
+				var points = [];
+				var dataObj = {};
+				if (pos_list.length > 0) {
+					var opts = {
+						width : 100,     // 信息窗口宽度
+						height: 50,     // 信息窗口高度
+						title : "时间", // 信息窗口标题
+						enableMessage:true,//设置允许信息窗发送短息
+						message: ""
+					}
+						
+					for(var i=0; i<pos_list.length; i++) {
+						var point = new BMap.Point(pos_list[i]['lng'], pos_list[i]['lat']);
+						var marker = new BMap.Marker(point);
+						dataObj['' + pos_list[i]['lng'] + '_' + pos_list[i]['lat']] = pos_list[i]['create_time'];
+						marker.addEventListener("click", function(e) {
+								var p = e.target;
+								var k = '' + p.getPosition().lng + '_' + p.getPosition().lat;
+								var text = '';
+								if (dataObj[k]) text = dataObj[k];
+								var infoWindow = new BMap.InfoWindow(text, opts);
+								map.openInfoWindow(infoWindow, new BMap.Point(p.getPosition().lng, p.getPosition().lat)); //开启信息窗口
+						});
+						map.addOverlay(marker);
+						points.push(point);
+						
+						if (i == 0) map.centerAndZoom(point, 8);
+					}
+					
+					var polyline = new BMap.Polyline(points, {strokeColor:"blue", strokeWeight:6, strokeOpacity:0.5});
+					map.addOverlay(polyline);          //增加折线
+				}
+			}
 			
 			function getExportFilter() {
 				var url = '';

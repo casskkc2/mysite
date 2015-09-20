@@ -461,7 +461,7 @@ class IssueController extends GlobalController {
 			$res = array();
 			$res['detail'] = $this->fetch('Issue:detail');
 			$res['reply'] = $this->fetch('Issue:reply');
-			$res['pos'] = array('lat'=>$info['lat'], 'lng'=>$info['lng']);
+			$res['pos'] = array('city'=>$this->city['city'], 'lat'=>$info['lat'], 'lng'=>$info['lng']);
 			$this->ajaxReturn($res);
 		}else {
 			

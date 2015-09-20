@@ -56,12 +56,13 @@
 					<div id="issue_reply" title="问题回复" data-options="" style="padding:10px;">
 						
 					</div>
-					<div title="地图位置">
-						
+					<div title="地图位置" style="padding:5px;">
+						<div id="allmap" style="overflow:hidden;margin:0;width:269px;height:450px;"></div>
 					</div>
 				</div>
 			</div>
 		</div>
+		<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=33FqAaSCIdSeYDQOVXYoV4f5"></script>
 		<script type="text/javascript">
 			var status = "{$status}";
 			var toolbar = [];
@@ -83,6 +84,7 @@
 			</if>
 		</script>
 		<script type="text/javascript">	
+			var pos = null;
 			$(function() {
 				$("#btn_search").click(function() {
 					var start_date = $("#filter_date_start").datebox("getValue");
@@ -94,6 +96,14 @@
 					if (keywords != "") params.keywords = keywords;
 					
 					$("#tb").datagrid("load", params);
+				});
+				
+				$("#aa").accordion({
+					onSelect: function(title, index) {
+						if (index == 2 && pos) {
+							addMap(pos);
+						}
+					}
 				});
 			});
 			
@@ -140,11 +150,41 @@
 					success: function(res) {
 						$("#issue_detail").html(res.detail);
 						$("#issue_reply").html(res.reply);
+						pos = res.pos;
+						addMap(res.pos);
 					},
 					error: function(xhr, ajaxOptions, thrownError) {
 						alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
 					}
 				});
+			}
+			
+			function addMap(pos) {
+				// 百度地图API功能
+				var map = new BMap.Map("allmap");
+				
+				if (pos['lat'] && pos['lng']) {
+					var point = new BMap.Point(pos['lng'], pos['lat']);
+					map.centerAndZoom(point, 15);
+					var marker = new BMap.Marker(point);  // 创建标注
+					map.addOverlay(marker);               // 将标注添加到地图中
+					marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+				}else {
+					// 创建地址解析器实例
+					var myGeo = new BMap.Geocoder();
+					// 将地址解析结果显示在地图上,并调整地图视野
+					myGeo.getPoint(pos["city"], function(point){
+						if (point) {
+							map.centerAndZoom(point, 16);
+							var marker = new BMap.Marker(point);
+							map.addOverlay(marker);
+							
+							marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+						}else{
+							alert("您选择地址没有解析到结果!");
+						}
+					}, pos['city']);
+				}
 			}
 			
 			function doCheck(mode) {
