@@ -48,10 +48,16 @@
 						<input type="text" id="weight" name="weight" value="{$info.weight|default=1}" data-rule-required="true" data-msg-required="请输入计数值" />
 					  </td>
 					</tr>
-					<tr>
+					<!--<tr>
 					  <td align="right">标题：</td>
 					  <td align="left">
 						<input type="text" id="title" name="title" size="100" data-rule-required="true" data-msg-required="请输入标题" />
+					  </td>
+					</tr>-->
+					<tr>
+					  <td align="right">发现人：</td>
+					  <td align="left">
+						<input type="text" id="checker" name="checker" value="{$info.checker}" data-rule-required="true" data-msg-required="请输入发现人" />
 					  </td>
 					</tr>
 					<tr>
@@ -144,7 +150,7 @@
 									$("#area_name_" + j).remove();
 								}
 							});
-							setIssueTitle();
+							//setIssueTitle();
 						}
 					});
 				});
@@ -178,7 +184,7 @@
 									$("#target_name_" + j).remove();
 								}
 							});
-							setIssueTitle();
+							//setIssueTitle();
 						}
 					});
 				});

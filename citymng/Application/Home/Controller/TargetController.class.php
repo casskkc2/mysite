@@ -74,7 +74,7 @@ class TargetController extends GlobalController {
 			$this->ajaxReturn($res);
 		}
 		
-		$cond = array('area_id'=>$id);
+		$cond = array('target_id'=>$id);
 		$count = M('Issue')->where($cond)->count();
 		if ($count > 0) {
 			$res['error'] = '该节点下有关联数据，不能删除';

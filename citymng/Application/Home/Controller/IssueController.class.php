@@ -33,7 +33,8 @@ class IssueController extends GlobalController {
 				'city_id' => $this->city['city_id'],
 				'examine_time' => date("Y-m-d H:i:s", strtotime(I('post.examine_time'))),
 				'weight' => I('post.weight'),
-				'title' => I('post.title'),
+				'title' => '',//I('post.title'),
+				'checker' => I('post.checker'),
 				'des' => I('post.des'),
 				'user_id' => $this->user['id'],
 				'status_id' => 1,
@@ -44,12 +45,14 @@ class IssueController extends GlobalController {
 				$data['tags'] .= $a_n . '|';
 				if ($k > 3) break; // max is $area4
 				$data['area' . ($k+1)] = $a_n;
+				$data['title'] .= $a_n;
 			}
 			$target_names = I('post.target_name');
 			foreach($target_names as $k=>$a_n){
 				$data['tags'] .= $a_n . '|';
 				if ($k > 2) break; // max is $target3
 				$data['target' . ($k+1)] = $a_n;
+				$data['title'] .= $a_n;
 			}
 			
 			$target = M('Target')->where(array('id'=>$data['target_id']))->find();
@@ -183,7 +186,8 @@ class IssueController extends GlobalController {
 				'city_id' => $this->city['city_id'],
 				'examine_time' => date("Y-m-d H:i:s", strtotime(I('post.examine_time'))),
 				'weight' => I('post.weight'),
-				'title' => I('post.title'),
+				'title' => '',//I('post.title'),
+				'checker' => I('post.checker'),
 				'des' => I('post.des'),
 				'last_mod_user_id' => $this->user['id']
 			);
@@ -193,12 +197,14 @@ class IssueController extends GlobalController {
 				$data['tags'] .= $a_n . '|';
 				if ($k > 3) break; // max is $area4
 				$data['area' . ($k+1)] = $a_n;
+				$data['title'] .= $a_n;
 			}
 			$target_names = I('post.target_name');
 			foreach($target_names as $k=>$a_n){
 				$data['tags'] .= $a_n . '|';
 				if ($k > 2) break; // max is $target3
 				$data['target' . ($k+1)] = $a_n;
+				$data['title'] .= $a_n;
 			}
 			
 			$target = M('Target')->where(array('id'=>$data['target_id']))->find();
@@ -504,10 +510,11 @@ class IssueController extends GlobalController {
 		
 		$cols = array(
 			'编号',
-			'区', '类别', '街', '路',
-			'一级指标', '二级指标', '三级指标', '指标代码',
-			'标题', '检查日期', '检查时间', '计数', '图片',
-			'详细描述'
+			'日期', '时间', '照片',
+			'区域', '类别', '街道', '道路名称',
+			'来源', '发现人', '指标代码',
+			'考评大类', '考评小类', '三级指标',
+			'详细信息', '问题个数', '录入员'
 		);
 		
 		if ($mode == 'default' || $mode == 'with_img') {
@@ -518,12 +525,20 @@ class IssueController extends GlobalController {
 				$img_value = '';
 				!empty($img) && $img_value = array('text'=>$img, 'url'=>$img);
 				
+				$user = M('User')->where(array('id'=>$row['user_id']))->find();
+				
+				if (empty($row['area4'])) {
+					$row['area4'] = $row['area3'];
+					$row['area3'] = '';
+				}
+				
 				$rows[] = array(
 					$row['id'],
+					$row['date'], $row['time'], ($mode == 'default' ? $img_value : $row['img']),
 					$row['area1'],$row['area2'],$row['area3'],$row['area4'],
-					$row['target1'],$row['target2'],$row['target3'],$row['target_code'],
-					$row['title'], $row['date'], $row['time'], $row['weight'], ($mode == 'default' ? $img_value : $row['img']),
-					$row['des']
+					$row['come_from'], $row['checker'], $row['target_code'],
+					$row['target1'],$row['target2'],$row['target3'],
+					$row['des'],  $row['weight'], (!empty($user['username']) ? $user['username'] : '')
 				);
 			}
 			$ExcelEvent = A('Excel', 'Event');
