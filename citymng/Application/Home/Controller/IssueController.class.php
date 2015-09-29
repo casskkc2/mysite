@@ -18,6 +18,10 @@ class IssueController extends GlobalController {
 		$this->assign('tabs', $tabs);
 		$this->assign('tools', $tools);
 		
+		$AreaEvent = A('Area', 'Event');
+		$area_list = $AreaEvent->getAreaList($this->city['city_id'], 0);
+		$this->assign('area_list', $area_list);
+		
 		$this->assign('title', '问题管理');
 		$this->assign('status', $status_id);
 		$this->assign('self_url', U('Issue/index', '', ''));
@@ -600,5 +604,112 @@ class IssueController extends GlobalController {
 		}
 		$this->assign('title', '批量上报');
 		$this->display();
+	}
+	
+	public function exportSummary() {
+		$root_area_ids = I('get.area', '');
+		$start_date = I('get.filter_date_start', '');
+		$end_date = I('get.filter_date_end', '');
+		
+		if (empty($root_area_ids)) {
+			$this->error('参数错误'); exit;
+		}
+		
+		$arr = explode(',', $root_area_ids);
+		$AreaEvent = A('Area', 'Event');
+		$area_list = $AreaEvent->getAreaAndChildrenByIds($this->city['city_id'], $arr);
+		//var_export($area_list);
+		$area_data = buildTree($area_list);
+		//var_export($area_data);exit;
+		//getSummaryColsFromTreeData($area_data);
+		//var_export($area_data);//exit;
+		//$area_max = getMaxDimensionOfTreeData($area_data);
+		//echo $area_max;exit;
+		$leaf_area = getLeafNodesFromTreeData($area_data);
+		//var_export($leaf_area); exit;
+		$leaf_area_id_arr = array_map(function($v) {
+			return $v['id'];
+		}, $leaf_area);
+		//var_export($leaf_area_id_arr); exit;
+		
+		$cond = array('city_id'=>$this->city['city_id']);
+		$target_list = M('Target')->where($cond)->order('path, sort')->select();
+		//var_export($target_list);exit;
+		$target_data = buildTree($target_list);
+		//var_export($target_data);exit;
+		getSummaryColsFromTreeData($target_data);
+		//var_export($target_data);//exit;
+		$target_max = getMaxDimensionOfTreeData($target_data);
+		//echo $target_max;exit;
+		$leaf_target = getLeafNodesFromTreeData($target_data);
+		//var_export($leaf_target); exit;
+		$leaf_target_id_arr = array_map(function($v){
+			return $v['id'];
+		}, $leaf_target);
+		//var_export($leaf_target_id_arr); exit;
+		
+		$where = array(
+			'city_id'	=> $this->city['city_id'],
+			'area_id'	=> array('in', $leaf_area_id_arr),
+			'target_id'	=> array('in', $leaf_target_id_arr)
+		);
+		$examine_time_cond = array();
+		!empty($end_date) && $examine_time_cond[]= array('elt', $end_date . ' 23:59:59');
+		!empty($start_date) && $examine_time_cond[]= array('egt', $start_date);
+		!empty($examine_time_cond) && $where['examine_time'] = $examine_time_cond;
+		
+		$data = array();
+		$list = M('Issue')
+			->field('SUM(weight) AS sum_weight, area_id, target_id')
+			->where($where)
+			->group('area_id, target_id')
+			->select();
+		foreach($list as $row) {
+			$data[$row['area_id']][$row['target_id']] = $row['sum_weight'];
+		}
+		//var_export($data);
+		$smry_total = array();
+		foreach($area_data as $key=>$value) { // add sum for each Area(the 1st dimension)
+			if (!empty($value['children'])) {
+				$id = 'smry_' . $value['id'];
+				$area_data[$key]['children'][] = array(
+					'id' => $id,
+					'is_smry'	=> true,
+					'text'	=> '小计'
+				);
+				$data[$id] = $this->_getSumForEachArea($value['children'], $data);
+				$smry_total = array_merge_sum($smry_total, $data[$id]);
+			}
+		}
+		$area_data[] = array(
+			'id'	=> 'smry_total',
+			'is_total'	=> true,
+			'text'	=> '总计'
+		);
+		$data['smry_total'] = $smry_total;
+		
+		//var_export($data);exit;
+		//var_export($area_data);exit;
+		getSummaryColsFromTreeData($area_data);
+		//var_export($area_data);exit;
+		$area_max = getMaxDimensionOfTreeData($area_data);
+		//echo $area_max;exit;
+		
+		$ExcelEvent = A('Excel', 'Event');
+		$ExcelEvent->exportSummary($area_data, $target_data, $area_max, $target_max, $data, '导出汇总' . date('YmdHi'));
+	}
+	
+	private function _getSumForEachArea($children, $data) { // only for the 1st dimension area
+		$res = array();
+		foreach($children as $key=>$child) {
+			if (empty($child['children'])) {
+				if (isset($data[$child['id']])) {
+					$res = array_merge_sum($res, $data[$child['id']]);
+				}
+			}else {
+				$res = array_merge_sum($res, $this->_getSumForEachArea($child['children'], $data));
+			}
+		}
+		return $res;
 	}
 }

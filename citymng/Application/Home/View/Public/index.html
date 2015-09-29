@@ -150,10 +150,18 @@ function login_onclick()
 			用户名：<input type="text" id="username" name="username" /> 密码：<input type="password" id="password" name="password" /> <input type="button" id="btn_login" value="登录" />
 		</div>
 	</div>
-	<!--
+	<script>
+		$("#password").keyup(function(e) {
+			if (e.which == 13) {
+				$("#btn_login").click();
+			}
+		});
+	</script>
+	
 	<div id="content" class="home_content" style="height:768px;">
 		<div class="home_title">数字综合管理平台</div>
-	</div>-->
+	</div>
+	
 	<script>
 	function login() {
 		var data = { } ;
@@ -196,11 +204,11 @@ function login_onclick()
 			login();
 		} );
 		
-		$("#password").keyup(function(e) {
+		/*$("#password").keyup(function(e) {
 			if (e.which == 13) {
 				$("#btn_login").click();
 			}
-		});
+		});*/
 	});
 	</script>
 	<div id="footer">
