@@ -24,13 +24,31 @@ class TargetController extends GlobalController {
 		$res = array();
 		
 		$city_id = I('post.city_id', 430100);
+		$filter = I('post.filter', '');
 		if (empty($city_id)) {
 			$this->ajaxReturn($res);
 		}
 		
-		$cond = array('city_id'=>$city_id);
+		$cond = array('city_id'=>$city_id, 'status' => 0);
+		if ($filter == 'all') unset($cond['status']);
 		$list = M('Target')->where($cond)->order('path, sort')->select();
-		$res = buildTree($list);
+		foreach($list as $key=>$row) {
+			if ($row['status'] == 1) {
+				$list[$key]['status_text'] = '已删除';
+			}else {
+				$list[$key]['status_text'] = '正常';
+			}
+		}
+		$res = buildTree($list, ',0,', array('sort', 'status_text', 'status', 'code'));
+		
+		$city = M('City')->where(array('city_id'=>$city_id))->find();
+		$res = array(
+			array(
+				'id' => 0,
+				'text' => $city['city'],
+				'children' => $res
+			)
+		);
 		
 		$this->ajaxReturn($res);
 	}
@@ -74,11 +92,11 @@ class TargetController extends GlobalController {
 			$this->ajaxReturn($res);
 		}
 		
-		$cond = array('target_id'=>$id);
+		/*$cond = array('target_id'=>$id);
 		$count = M('Issue')->where($cond)->count();
 		if ($count > 0) {
 			$res['error'] = '该节点下有关联数据，不能删除';
-		}
+		}*/
 		
 		$this->ajaxReturn($res);
 	}
@@ -93,7 +111,8 @@ class TargetController extends GlobalController {
 		}
 		
 		$cond = array('id'=>$id);
-		$stat = M('Target')->where($cond)->delete();
+		$data = array('status' => 1);
+		$stat = M('Target')->where($cond)->data($data)->save();
 		if (false === $stat) {
 			$res['error'] = '删除失败';
 			$this->ajaxReturn($res);
@@ -109,6 +128,7 @@ class TargetController extends GlobalController {
 		$data['name'] = I('post.name');
 		$data['sort'] = I('post.sort');
 		$data['code'] = I('post.code');
+		$data['status'] = I('post.status');
 		if ($id == 0) {
 			$data['city_id'] = I('post.city_id');
 			$pid = I('post.pid');

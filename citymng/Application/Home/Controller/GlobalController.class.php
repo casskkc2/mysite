@@ -69,7 +69,7 @@ class GlobalController extends BaseController {
     	}
 	}
 	
-	public function _upload2($file, $thumb = false, $width = 360, $height = 360, $exts='no_limit'){
+	public function _upload2($file, $thumb = false, $width = 360, $height = 360, $exts=''){
 		$root = C('UPLOAD_DIR');
 		$path = date("Ym") . '/';
 		

@@ -81,7 +81,7 @@ class IssueController extends GlobalController {
 						'error' => $_FILES['reply_img']['error'][$img_i],
 						'size' => $_FILES['reply_img']['size'][$img_i],
 					);
-					$file_info = $this->_upload2($file);
+					$file_info = $this->_upload2($file, false, 0, 0, 'no_limit');
 					if (is_array($file_info)) { // upload successfully
 						if ($img_i == 0) {
 							$data['img'] = $file_info['file_path'];

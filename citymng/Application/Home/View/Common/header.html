@@ -54,7 +54,7 @@ var ROOT = "__MODULE__";
 			欢迎您，<span style="color:red;">{$current_user.username}</span> <span class="top_cont2"><a href="__MODULE__/Account/logout">退出</a> | <a href="__MODULE__/Account/pwd">修改密码</a></span>
 		</div>
 	</div>
-
+<!--
 	<div id="header">
 		<div class="header_title">数字综合管理平台</div>
 		<div class="nav">
@@ -67,13 +67,19 @@ var ROOT = "__MODULE__";
 				<if condition="$current_user['user_type_id'] eq 10">
 				<li><a href="__MODULE__/Area">区域维护</a></li>
 				<li><a href="__MODULE__/Target">代码指标维护</a></li>
-				<li><a href="__MODULE__/User">用户管理</a></li>
+				</if>
+				
+				<if condition="in_array($current_user['user_type_id'], array(12, 10))">
 				<li><a href="__MODULE__/Bulletin/edit">编辑公告</a></li>
+				</if>
+				
+				<if condition="$current_user['user_type_id'] eq 19">
+				<li><a href="__MODULE__/User">用户管理</a></li>
 				</if>
 				
 			</ul>
 		</div>
-	</div>
+	</div>-->
 	<div id="content" class="main_content">
 		<!--<div id="notice">
 			<div>

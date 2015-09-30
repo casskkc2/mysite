@@ -27,6 +27,9 @@ function buildTree($data, $pid=',0,', $attrs=array(), $id="id", $text='name') {
 				'id' => $row[$id],
 				'text' => $row[$text]
 			);
+			if (isset($row['status']) && $row['status'] == 1) {
+				$tmp['iconCls'] = 'tree-dnd-no';
+			}
 			if (!empty($attrs)) {
 				foreach($attrs as $o) {
 					if (isset($row[$o])) {

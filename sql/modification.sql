@@ -23,3 +23,8 @@ CREATE TABLE `bulletin` (
 
 ALTER TABLE `issue` ADD COLUMN `come_from` VARCHAR(30) DEFAULT '网站上传' COMMENT '来源';
 ALTER TABLE `issue` ADD COLUMN `checker` VARCHAR(30) COMMENT '发现人';
+
+INSERT INTO `user_type`(user_type_id, type_name, gtype) VALUES(19, '特权管理员', 1);
+
+ALTER TABLE `target` ADD COLUMN `status` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '状态 0 未删除, 1 已删除';
+ALTER TABLE `area` ADD COLUMN `status` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '状态 0 未删除, 1 已删除';

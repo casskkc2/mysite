@@ -62,11 +62,41 @@
 							<td><input type="text" id="code" /></td>
 						</tr>
 						<tr>
+							<td align="right">状态：</td>
+							<td><select id="status">
+								<option value="0">正常</option>
+								<option value="1">已删除</option>
+							</select></td>
+						</tr>
+						<tr>
 							<td></td>
 							<td>
 								<input type="hidden" id="id" value="" />
 								<a class="button" id="btn_submit">新增</a>
 							</td>
+						</tr>
+					</tbody>
+					</table>
+					<table class="form2">
+					<tbody>
+						<tr>
+							<td colspan="2">当前选中节点</td>
+						</tr>
+						<tr>
+							<td align="right">名称：</td>
+							<td id="current_node_name"></td>
+						</tr>
+						<tr>
+							<td align="right">排序：</td>
+							<td id="current_node_sort"></td>
+						</tr>
+						<tr>
+							<td align="right">代码：</td>
+							<td id="current_node_code"></td>
+						</tr>
+						<tr>
+							<td align="right">状态：</td>
+							<td id="current_node_status"></td>
 						</tr>
 					</tbody>
 					</table>
@@ -78,6 +108,7 @@
 		<script type="text/javascript">
 			var sel_city_id = "{$sel_city.city_id}";
 			var sel_province_id = "{$sel_city.province_id}";
+			var status_arr = ['正常', '已删除'];
 			$(function() {
 				$("#province").on('change', function() {
 					sel_province_id = $("#province").val();
@@ -103,11 +134,16 @@
 						alert("请选择要修改的节点"); return false;
 					}
 					
+					if (node.id == 0) {
+						alert("此节点不可编辑"); return false;
+					}
+					
 					getNodeInfo(ROOT + '/Target/getNode', node.id, function(info) {
 						$("#id").val(info.id);
 						$("#name").val(info.name);
 						$("#sort").val(info.sort);
 						$("#code").val(info.code);
+						$("#status").val(info.status);
 						$("#btn_submit").html('修改');
 					});
 				});
@@ -116,6 +152,10 @@
 					var node = $("#tree").tree("getSelected");
 					if (node == null) {
 						alert("请选择要删除的节点"); return false;
+					}
+					
+					if (node.id == 0) {
+						alert("此节点不可删除"); return false;
 					}
 					
 					if(!confirm("删除后不可恢复，确定要删除节点：[" + node.text + "] 吗?")) return false;
@@ -131,19 +171,25 @@
 								alert(err);
 								return false;
 							}
-							$("#tree").tree("remove", node.target);
+							$("#tree").tree("update", {
+								target:node.target,
+								iconCls: 'tree-file tree-dnd-no',
+								attributes: $.extend({}, node.attributes, {'status':1, 'status_text':status_arr[1]})
+							});
+							$("#tree").tree("select", node.target);
 						});
 					});
 				});
 				
 				$("#btn_submit").on("click", function() {
-					var node = $("#tree").tree("getSelected");
+					var node = $("#tree").tree("getSelected") || $("#tree").tree("getRoot");
 					var id = $("#id").val();
 					var data = {
 						id: id,
 						name: $("#name").val(),
 						sort: $("#sort").val(),
 						code: $("#code").val(),
+						status: $("#status").val(),
 						pid: node ? node.id : 0,
 						city_id: sel_city_id
 					};
@@ -153,8 +199,16 @@
 							resetForm();
 							$("#tree").tree('update', {
 								target: node.target,
-								text: res.name
+								text: res.name,
+								iconCls: data['status'] == 1 ? 'tree-file tree-dnd-no' : 'tree-file',
+								attributes: $.extend({}, node.attributes, {
+									sort: data['sort'],
+									code: data['code'],
+									status: data['status'], 
+									status_text: status_arr[data['status']]
+								})
 							});
+							$("#tree").tree("select", node.target);
 						}else {
 							alert("新增成功");
 							$("#tree").tree("append", {
@@ -173,7 +227,15 @@
 			function loadTree(city_id) {
 				$("#tree").tree({
 					url: ROOT + '/Target/getTree',
-					queryParams: {city_id: sel_city_id}
+					queryParams: {city_id: sel_city_id, filter: 'all'},
+					onSelect: function(node) {
+						if (node.id == 0) return false;
+						resetForm();
+						$("#current_node_status").html(node.attributes.status_text);
+						$("#current_node_name").html(node.text);
+						$("#current_node_sort").html(node.attributes.sort);
+						$("#current_node_code").html(node.attributes.code);
+					}
 				});
 			}
 			
@@ -182,6 +244,7 @@
 				$("#name").val('');
 				$("#sort").val('');
 				$("#code").val('');
+				$("#status").val(0);
 				$("#btn_submit").html('新增');
 			}
 			
