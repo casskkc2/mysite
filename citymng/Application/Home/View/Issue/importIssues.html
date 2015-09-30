@@ -26,11 +26,26 @@
 		</div>
 		<script type="text/javascript">
 			$(function() {
-				$("#btn_submit").click(function(){
-					$("#formSubmit").submit();            
-				});
+				toggleBtnSubmit('enable');
 				
-				$("#formSubmit").validate();
+				$("#formSubmit").validate({
+					submitHandler: function(form) {
+						if ( !$("#formSubmit").form("validate") ) return false;
+						form.submit();
+						toggleBtnSubmit('disable');
+					}
+				});
 			});
+			
+			function submitUploadForm() {
+				$("#formSubmit").submit();
+			}
+			function toggleBtnSubmit(mode) {
+				if (mode == "disable") {
+					$("#btn_submit").attr('class', 'button_gray').off('click');
+				}else if (mode == "enable"){
+					$("#btn_submit").attr('class', 'button').on('click', submitUploadForm);
+				}
+			}
 		</script>
 <include file="Common/footer" />
