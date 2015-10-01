@@ -4,7 +4,7 @@ use Think\Controller;
 class TargetController extends GlobalController {
 	function _initialize(){
 		parent::_initialize();
-		if ($this->user['user_type_id'] != 10) {
+		if (!in_array($this->user['user_type_id'], array(10, 19))) {
 			$this->error('无权限访问');
 		}
 	}

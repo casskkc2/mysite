@@ -11,6 +11,10 @@ class UserController extends GlobalController {
     public function index(){
 		$this->assign('title', '用户管理');
 		
+		$AreaEvent = A('Area', 'Event');
+		$provinces = $AreaEvent->getProvinceList();
+		$this->assign('provinces', $provinces);
+		
 		$this->display();
     }
 	
@@ -29,7 +33,8 @@ class UserController extends GlobalController {
 			$data = array(
 				'username' => $username,
 				'password' => md5encode(I('post.newpwd')),
-				'smartphone' => I('post.smartphone'),
+				'smartphone' => I('post.smartphone', ''),
+				'department' => I('post.department', ''),
 				'user_type_id' => I('post.user_type_id'),
 				'city_id' => I('post.city'),
 				'target' => I('post.target'),
@@ -45,7 +50,7 @@ class UserController extends GlobalController {
 		}
 		$this->assign('title', '添加用户');
 		
-		$user_types = M('UserType')->select();
+		$user_types = M('UserType')->order('gtype')->select();
 		$this->assign('user_types', $user_types);
 		
 		$AreaEvent = A('Area', 'Event');
@@ -60,7 +65,8 @@ class UserController extends GlobalController {
 		if($_POST) {
 			$data = array(
 				'id' => I('post.id'),
-				'smartphone' => I('post.smartphone'),
+				'smartphone' => I('post.smartphone', ''),
+				'department' => I('post.department', ''),
 				'user_type_id' => I('post.user_type_id'),
 				'city_id' => I('post.city'),
 				'target' => I('post.target'),
@@ -86,7 +92,7 @@ class UserController extends GlobalController {
 			->where(array('u.id'=>$id))->find();
 		if (empty($user)) $this->error('参数错误', 'javascript:history.back(-1);', 5);
 		
-		$user_types = M('UserType')->select();
+		$user_types = M('UserType')->order('gtype')->select();
 		$this->assign('user_types', $user_types);
 		
 		$AreaEvent = A('Area', 'Event');
@@ -101,7 +107,7 @@ class UserController extends GlobalController {
 	public function jsondata() {
 		$page = I('post.page', 1);
 		$rows = I('post.rows', 20);
-		$sort = I('post.sort', 'username');
+		$sort = I('post.sort', 'ut.gtype');
 		$order_by = I('post.order', 'ASC');
 		
 		$username = I('post.username', '');

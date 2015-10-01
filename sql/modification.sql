@@ -28,3 +28,6 @@ INSERT INTO `user_type`(user_type_id, type_name, gtype) VALUES(19, '特权管理
 
 ALTER TABLE `target` ADD COLUMN `status` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '状态 0 未删除, 1 已删除';
 ALTER TABLE `area` ADD COLUMN `status` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '状态 0 未删除, 1 已删除';
+
+ALTER TABLE `user` MODIFY COLUMN `smartphone` VARCHAR(15) COMMENT '手机号';
+ALTER TABLE `user` ADD COLUMN `department` VARCHAR(30) COMMENT '部门';
