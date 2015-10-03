@@ -17,7 +17,11 @@
 				 <div class="tab">
 					 <ul>
 						<volist name="tabs" id="vo">
-						<li <if condition="$status eq $vo['st']">class="selected"</if>><a href="{$self_url}/st/{$vo.st}">{$vo.name}</a></li>
+							<if condition="$vo === 'sp'">
+							<br />
+							<else />
+							<li class="nbutton <if condition="$status eq $vo['st']">selected</if>"><a href="{$self_url}/st/{$vo.st}">{$vo.name}</a></li>
+							</if>
 						</volist>
 						<!--
 						<li <eq name="status" value="1">class="selected"</eq>><a href="{$self_url}/st/1">待审核</a></li>
@@ -28,6 +32,7 @@
 						<li <eq name="status" value="22">class="selected"</eq>><a href="{$self_url}/st/22">重点问题</a></li>
 						<li <eq name="status" value="9">class="selected"</eq>><a href="{$self_url}/st/9">同意无法处理</a></li>-->
 					 </ul>
+					 <div style="clear:both;"></div>
 				 </div>
 				 
 				<table id="tb" style="width:710px;min-height:400px;">
@@ -50,8 +55,15 @@
 					<tbody>
 					<tr>
 						<td align="right">区: 
-							<select id="filter_area" class="easyui-combobox" multiple="true" style="width:200px;">
+							<select id="filter_area" class="easyui-combobox" multiple="true" style="width:100px;">
 								<volist name="area_list" id="vo">
+								<option value="{$vo.id}">{$vo.name}</option>
+								</volist>
+							</select>
+						</td>
+						<td align="right">指标: 
+							<select id="filter_target" class="easyui-combobox" multiple="true" style="width:100px;">
+								<volist name="target_list" id="vo">
 								<option value="{$vo.id}">{$vo.name}</option>
 								</volist>
 							</select>
@@ -146,7 +158,7 @@
 					{field:'aid',title:'', checkbox:true},
 					{field:'id',title:'编号', width:50},
 					{field:'area1',title:'区域',width:80},
-					{field:'title',title:'标题',width:310},
+					{field:'new_title',title:'标题',width:310},
 					{field:'date',title:'检查日期',width:80},
 					{field:'time',title:'检查时间',width:80},
 					{field:'weight',title:'计数',width:80}
@@ -251,6 +263,11 @@
 					url += '/filter_date_end/' + encodeURIComponent(filter_date_end);
 				}
 				
+				var keywords = $("#keywords").val();
+				if (keywords) {
+					url += '/keywords/' + encodeURIComponent(keywords);
+				}
+				
 				return url;
 			}
 			function doExport(mode) {
@@ -274,6 +291,11 @@
 				var area = $("#filter_area").combobox("getValues");
 				if (area) {
 					url += '/area/' + encodeURIComponent(area);
+				}
+				
+				var target = $("#filter_target").combobox("getValues");
+				if (target) {
+					url += '/target/' + encodeURIComponent(target);
 				}
 				
 				window.open(url);

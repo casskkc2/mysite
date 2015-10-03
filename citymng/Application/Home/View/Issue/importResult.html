@@ -21,10 +21,18 @@ img {
 	<notempty name="error">
 	<span class="error">{$error}</span>
 	<else />
-	共上传 {$res.total} 条数据。成功 {$res.success_num} 条，失败 <span class="error">{$res.fail_num}</span> 条。<br />
+	<!--共上传 {$res.total} 条数据。成功 {$res.success_num} 条，失败 <span class="error">{$res.fail_num}</span> 条。<br />
 	<volist name="res['fails']" id="vo">
 	第 {$vo.seq} 行数据上传失败。错误原因: <span class="error">{$vo.error}。</span><br />
-	</volist>
+	</volist>-->
+	<if condition="$res['fail_num'] gt 0">
+		导入失败。<br />
+		<volist name="res['fails']" id="vo">
+		第 {$vo.seq} 行数据不正确：<span class="error">{$vo.error}。</span><br />
+		</volist>
+	<else />
+		导入成功，共导入{$res.success_num} 条数据。
+	</if>
 	</notempty>
 	
 	</div>

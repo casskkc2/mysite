@@ -22,6 +22,10 @@ class IssueController extends GlobalController {
 		$area_list = $AreaEvent->getAreaList($this->city['city_id'], 0);
 		$this->assign('area_list', $area_list);
 		
+		$TargetEvent = A('Target', 'Event');
+		$target_list = $TargetEvent->getTargetList($this->city['city_id'], 0);
+		$this->assign('target_list', $target_list);
+		
 		$this->assign('title', '问题管理');
 		$this->assign('status', $status_id);
 		$this->assign('self_url', U('Issue/index', '', ''));
@@ -52,12 +56,14 @@ class IssueController extends GlobalController {
 				$data['title'] .= $a_n;
 			}
 			$target_names = I('post.target_name');
+			$target_last_name = '';
 			foreach($target_names as $k=>$a_n){
 				$data['tags'] .= $a_n . '|';
 				if ($k > 2) break; // max is $target3
 				$data['target' . ($k+1)] = $a_n;
-				$data['title'] .= $a_n;
+				$target_last_name = $a_n;
 			}
+			$data['title'] .= $target_last_name;
 			
 			$target = M('Target')->where(array('id'=>$data['target_id']))->find();
 			if (!empty($target)) {
@@ -204,12 +210,14 @@ class IssueController extends GlobalController {
 				$data['title'] .= $a_n;
 			}
 			$target_names = I('post.target_name');
+			$target_last_name = '';
 			foreach($target_names as $k=>$a_n){
 				$data['tags'] .= $a_n . '|';
 				if ($k > 2) break; // max is $target3
 				$data['target' . ($k+1)] = $a_n;
-				$data['title'] .= $a_n;
+				$target_last_name = $a_n;
 			}
+			$data['title'] .= $target_last_name;
 			
 			$target = M('Target')->where(array('id'=>$data['target_id']))->find();
 			if (!empty($target)) {
@@ -399,10 +407,17 @@ class IssueController extends GlobalController {
 		}
 		
 		if (!empty($operation_id)) {
-			$stat = $IssueEvent->doOperation($operation_id, $this->user, $info, $this->setting);
-			if (false === $stat) {
+			$new_status_id = $IssueEvent->doOperation($operation_id, $this->user, $info, $this->setting);
+			if (false === $new_status_id) {
 				echo '<script>parent.alert("操作失败");</script>';
 				exit;
+			}
+			if ($new_status_id > 0) {
+				$status = M('IssueStatus')->where(array('status_id'=>$new_status_id))->find();
+				if (!empty($status)) {
+					if ($status['status_id'] == 3 && $this->user['user_type_id'] >= 20) $status['name'] = '待处理';
+					$reply_text = '[' . $status['name'] . ']' . $reply_text;
+				}
 			}
 		}
 		if (!empty($reply_text)) {
@@ -500,25 +515,36 @@ class IssueController extends GlobalController {
 		$status = I('get.status', 0);
 		$filter_date_start = I('get.filter_date_start', '');
 		$filter_date_end = I('get.filter_date_end', '');
+		$keywords = I('get.keywords', '');
 		
-		!empty($filter_date_start) && $data['exm_start_date'] = $filter_date_start;
-		!empty($filter_date_end) && $data['exm_end_date'] = $filter_date_end;
+		$cond = array();
+		$cond['city_id'] = $this->city['city_id'];
+		
+		if ( !in_array($this->user['user_type_id'], array(10, 20)) ) {
+			$cond['area'] = $this->user['area'];
+			$cond['target'] = $this->user['target'];
+		}
+		
+		!empty($keywords) && $cond['keywords'] = $keywords;
+		!empty($filter_date_start) && $cond['exm_start_date'] = $filter_date_start;
+		!empty($filter_date_end) && $cond['exm_end_date'] = $filter_date_end;
 		
 		$IssueEvent = A('Issue', 'Event');
 		if(!empty($status)) {
-			$IssueEvent->statusToQueryCondition($status, $data);
+			$IssueEvent->statusToQueryCondition($status, $cond);
 		}
 		
-		$res = $IssueEvent->getIssueList($data);
+		$res = $IssueEvent->getIssueList($cond);
 		$data = $res['data'];
 		
 		$cols = array(
 			'编号',
-			'日期', '时间', '照片',
+			'日期', '时间',
 			'区域', '类别', '街道', '道路名称',
 			'来源', '发现人', '指标代码',
-			'考评大类', '考评小类', '三级指标',
-			'详细信息', '问题个数', '录入员'
+			'一级指标', '二级指标', '三级指标',
+			'详细信息', '问题个数', '状态', '录入员',
+			'照片'
 		);
 		
 		if ($mode == 'default' || $mode == 'with_img') {
@@ -538,11 +564,12 @@ class IssueController extends GlobalController {
 				
 				$rows[] = array(
 					$row['id'],
-					$row['date'], $row['time'], ($mode == 'default' ? $img_value : $row['img']),
+					$row['date'], $row['time'], 
 					$row['area1'],$row['area2'],$row['area3'],$row['area4'],
 					$row['come_from'], $row['checker'], $row['target_code'],
 					$row['target1'],$row['target2'],$row['target3'],
-					$row['des'],  $row['weight'], (!empty($user['username']) ? $user['username'] : '')
+					$row['des'],  $row['weight'], $row['status_name'], (!empty($user['username']) ? $user['username'] : ''),
+					($mode == 'default' ? $img_value : $row['img'])
 				);
 			}
 			$ExcelEvent = A('Excel', 'Event');
@@ -570,7 +597,7 @@ class IssueController extends GlobalController {
 				if (empty($row['img']) || !file_exists($row['img'])) continue;
 				
 				$ext = strrchr($row['img'], '.');
-				$new_name = $row['title'] . $ext;
+				$new_name = $row['new_title'] . $ext;
 				$new_name = iconv('UTF-8', 'GBK', $new_name);
 		
 				$zip->addFile($row['img'], $new_name);
@@ -610,8 +637,9 @@ class IssueController extends GlobalController {
 		$root_area_ids = I('get.area', '');
 		$start_date = I('get.filter_date_start', '');
 		$end_date = I('get.filter_date_end', '');
+		$root_target_ids = I('get.target', '');
 		
-		if (empty($root_area_ids)) {
+		if (empty($root_area_ids) || empty($root_target_ids)) {
 			$this->error('参数错误'); exit;
 		}
 		
@@ -632,8 +660,11 @@ class IssueController extends GlobalController {
 		}, $leaf_area);
 		//var_export($leaf_area_id_arr); exit;
 		
-		$cond = array('city_id'=>$this->city['city_id']);
-		$target_list = M('Target')->where($cond)->order('path, sort')->select();
+		$arr = explode(',', $root_target_ids);
+		$TargetEvent = A('Target', 'Event');
+		$target_list = $TargetEvent->getTargetAndChildrenByIds($this->city['city_id'], $arr);
+		//$cond = array('city_id'=>$this->city['city_id']);
+		//$target_list = M('Target')->where($cond)->order('path, sort')->select();
 		//var_export($target_list);exit;
 		$target_data = buildTree($target_list);
 		//var_export($target_data);exit;

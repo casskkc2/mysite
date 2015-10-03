@@ -190,24 +190,92 @@ a.button_gray {
     text-decoration: none;
 }
 .tab {
-	height:30px;
+	/*height:30px;*/
 }
-.tab ul {padding:0;}
+
+.nbutton {
+	-moz-transition: background-position 1s ease 0s;
+    background-clip: border-box;
+    background-position: left bottom, right top, 0 0px, 0 0;
+    background-repeat: no-repeat;
+    border-radius: 6px 6px 0 0;
+    box-shadow: 0 0 1px #FFFFFF inset;
+    cursor: pointer;
+    display: inline-block;
+    font: 15px Calibri,Arial,sans-serif;
+    padding: 2px 5px;
+    position: relative;
+    text-decoration: none !important;
+    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4);
+    vertical-align: baseline;
+    white-space: nowrap;
+}
+
+.tab ul {padding:0; line-height:32px;}
 .tab ul li {
-    border-right: 1px solid #99999a;
+    /*border-right: 1px solid #99999a;*/
     float: left;
     font-size: 14px;
     line-height: 28px;
     text-align: center;
 	padding: 0 5px;
-	background: #2F4FCB none repeat scroll 0 0;
-    border-radius: 0px;
+	/*background: #2F4FCB none repeat scroll 0 0;
+    border-radius: 0px;*/
+	margin:0 1px 2px 0;
+	
+	background-color: #89A1C3; /*#48B5F2;*/
+    /*background-image: -moz-radial-gradient(center bottom , circle , #59D0F4 0px, rgba(89, 208, 244, 0) 100px), -moz-linear-gradient(#4FBBF7, #3FAEEB);*/
+	/*background-image: -moz-radial-gradient(center bottom , circle , #59D0F4 0px, rgba(89, 208, 244, 0) 100px), -moz-linear-gradient(#4FBBF7, #3FAEEB);*/
+	/*background-image: -moz-radial-gradient(center bottom , circle , #2F4FCB 0px, rgba(47, 79, 203, 0) 100px), -moz-linear-gradient(#2530C8, #1724C2);*/
+	background-image: -moz-radial-gradient(center bottom , circle , #89A1C3 0px, rgba(137, 161, 195, 0) 100px), -moz-linear-gradient(#2530C8, #1724C2);
+    border: 1px solid #84ACC3 !important;
+    color: #0F4B6D !important;
 }
+
+.tab ul li:hover{
+	/*background-color:#63c7fe;
+	background-image:	-moz-radial-gradient(	center bottom, circle,
+												rgba(109,217,250,1) 0,rgba(109,217,250,0) 100px),
+						-moz-linear-gradient(#63c7fe, #58bef7);
+						
+	background-image:	-webkit-gradient(	radial, 50% 100%, 0, 50% 100%, 100,
+											from(rgba(109,217,250,1)), to(rgba(109,217,250,0))),
+						-webkit-gradient(linear, 0% 0%, 0% 100%, from(#63c7fe), to(#58bef7));
+	*/
+	/*
+	background-color:#4847D8;
+	background-image:	-moz-radial-gradient(	center bottom, circle,
+												rgba(92,100,230,1) 0,rgba(92,100,230,0) 100px),
+						-moz-linear-gradient(#4847D8, #4039C5);
+						
+	background-image:	-webkit-gradient(	radial, 50% 100%, 0, 50% 100%, 100,
+											from(rgba(92,100,230,1)), to(rgba(92,100,230,0))),
+						-webkit-gradient(linear, 0% 0%, 0% 100%, from(#4847D8), to(#4039C5));
+	*/
+	background-color:#093D86;
+	background-image:	-moz-radial-gradient(	center bottom, circle,
+												rgba(9,61,134,1) 0,rgba(9,61,134,0) 100px),
+						-moz-linear-gradient(#093D86, #4039C5);
+						
+	background-image:	-webkit-gradient(	radial, 50% 100%, 0, 50% 100%, 100,
+											from(rgba(9,61,134,1)), to(rgba(9,61,134,0,1))),
+						-webkit-gradient(linear, 0% 0%, 0% 100%, from(#093D86), to(#4039C5));
+}
+
 .tab ul li.selected{
-	background: #2F8DCB none repeat scroll 0 0;
+	/*background: #2F8DCB none repeat scroll 0 0;*/
+	background-color: #A9ADB1;
+    background-image: -moz-radial-gradient(center bottom , circle , #C5C7CA 0px, rgba(9,61,134, 0) 100px), -moz-linear-gradient(#C5C7CA, #92989C);
+    border: 1px solid #A5A5A5 !important;
 }
-.tab ul li a { color : #fff;}
-.tab ul li.selected a { color : #fff;}
+.tab ul li.selected:hover{
+	background-color:#b6bbc0;
+	background-image:-moz-radial-gradient(center bottom, circle, rgba(202,205,208,1) 0,rgba(202,205,208,0) 100px),-moz-linear-gradient(#d1d3d6, #9fa5a9);
+	background-image:-webkit-gradient(radial, 50% 100%, 0, 50% 100%, 100, from(rgba(202,205,208,1)), to(rgba(202,205,208,0))),-webkit-gradient(linear, 0% 0%, 0% 100%, from(#d1d3d6), to(#9fa5a9));
+}
+.tab ul li a { color : #000 !important;}
+.tab ul li:hover a { color : #FFFDDD !important;}
+.tab ul li.selected a { color : #000 !important;;}
 
 .gray {
 	color:#666;
