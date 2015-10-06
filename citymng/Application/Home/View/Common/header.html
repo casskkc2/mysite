@@ -42,24 +42,16 @@ var ROOT = "__MODULE__";
 <body>
 <div id="container">
 
-	<div id="top">
-		<div class="top_left">
-		<present name="bulletin">
-		<marquee width="600px" height="28px" direction="left" scrollamount="3"           onmouseover="this.stop()" onmouseout="this.start()">
-					公告：<span style="color:red">{$bulletin}</span>
-				</marquee>
-		</present>
-		</div>
-		<div class="top_right">
-			欢迎您，<span style="color:red;">{$current_user.username}</span> <span class="top_cont2"><a href="__MODULE__/Account/logout">退出</a> | <a href="__MODULE__/Account/pwd">修改密码</a></span>
-		</div>
-	</div>
+	<include file="Common/top" />
 
 	<div id="header">
-		<div class="header_title">数字综合管理平台</div>
+		<div class="header_title">第三方检查监督数字化平台</div>
 		<div class="nav">
 			<ul>
+				<if condition="$current_user['user_type_id'] neq 19">
 				<li><a href="__MODULE__/Issue">问题管理</a></li>
+				</if>
+				
 				<if condition="in_array($current_user['user_type_id'], array(11, 10))">
 				<li><a href="__MODULE__/Issue/add">问题上报</a></li>
 				<li><a href="__MODULE__/Issue/importIssues">批量上报</a></li>
@@ -67,6 +59,8 @@ var ROOT = "__MODULE__";
 				<if condition="$current_user['user_type_id'] eq 10">
 				<li><a href="__MODULE__/Area">区域维护</a></li>
 				<li><a href="__MODULE__/Target">代码指标维护</a></li>
+				<li><a href="__MODULE__/Faq">常见问题</a></li>
+				<li><a href="__MODULE__/Setting/edit">修改配置项</a></li>
 				</if>
 				
 				<if condition="in_array($current_user['user_type_id'], array(12, 10))">
@@ -75,6 +69,7 @@ var ROOT = "__MODULE__";
 				
 				<if condition="$current_user['user_type_id'] eq 19">
 				<li><a href="__MODULE__/User">用户管理</a></li>
+				<li><a href="__MODULE__/Issue/superMng">数据管理</a></li>
 				</if>
 				
 			</ul>

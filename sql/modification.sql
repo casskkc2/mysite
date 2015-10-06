@@ -31,3 +31,13 @@ ALTER TABLE `area` ADD COLUMN `status` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '�
 
 ALTER TABLE `user` MODIFY COLUMN `smartphone` VARCHAR(15) COMMENT '手机号';
 ALTER TABLE `user` ADD COLUMN `department` VARCHAR(30) COMMENT '部门';
+
+CREATE TABLE `faq` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增编号',
+  `title` varchar(255) NOT NULL COMMENT '问题标题',
+  `answer` text COMMENT '问题答案',
+  `sort` tinyint NOT NULL DEFAULT 0 COMMENT '排序',
+  `create_time` datetime NOT NULL COMMENT '创建时间',
+  `last_mod_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

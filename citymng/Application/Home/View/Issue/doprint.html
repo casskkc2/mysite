@@ -5,12 +5,16 @@
 <base href="" />
 <meta content="text/html; charset=utf-8" http-equiv="content-type" />
 <link rel="stylesheet" type="text/css" href="__PUBLIC__/stylesheet/style.css" />
+<script type="text/javascript" src="__PUBLIC__/javascript/jquery/jquery.min.js"></script>
 <style type="text/css">
 table {
 	width: 880px;
 }
 img {
 	max-width:780px;
+}
+.empty {
+	height: 25px;
 }
 </style>
 </head>
@@ -19,7 +23,9 @@ img {
 <div style="margin:auto; width:880px;">
 	<div style="width:100%; margin:20px 0 10px; font-size:14px; text-align:center;">
 		<a href="javascript:window.print();" >[打印]</a>&nbsp;&nbsp;
-		<a href="javascript:window.close();" >[关闭]</a>
+		<a href="javascript:window.close();" >[关闭]</a>&nbsp;&nbsp;
+		<a href="javascript:void();" name="btn_show_adjust">[显示调整按钮]</a>&nbsp;&nbsp;
+		<a href="javascript:void();" name="btn_hide_adjust" style="display:none;">[隐藏调整按钮]</a
 	</div>
 	<table class="detail" cellspacing="1" cellpadding="5">
 		<if condition="!empty($info['img'])">
@@ -83,6 +89,10 @@ img {
 		<tr>
 			<if condition="$vo['is_img'] eq 1">
 			<td align="center">
+				<div>
+				<input type="button" name="adjust_add_{$vo.id}" style="display:none" value="增加空行" />
+				<input type="button" name="adjust_remove_{$vo.id}" style="display:none" value="减少空行"/>
+				</div>
 				<img src="{$vo.path}" />
 			</td>
 			<else />
@@ -97,7 +107,29 @@ img {
 	</table>
 	<div style="width:100%; margin:10px 0 20px; font-size:14px; text-align:center;">
 		<a href="javascript:window.print();" >[打印]</a>&nbsp;&nbsp;
-		<a href="javascript:window.close();" >[关闭]</a>
+		<a href="javascript:window.close();" >[关闭]</a>&nbsp;&nbsp;
+		<a href="javascript:void();" name="btn_show_adjust" >[显示调整按钮]</a>&nbsp;&nbsp;
+		<a href="javascript:void();" name="btn_hide_adjust" style="display:none;" >[隐藏调整按钮]</a>
 	</div>
 </div>
+<script>
+$(function() {
+	$("input[name^=adjust_add_]").click(function() {
+		$(this).parent().before('<div class="empty"></div>');
+	});
+	$("input[name^=adjust_remove_]").click(function() {
+		$(this).parent().parent().children('.empty').eq(0).remove();
+	});
+	$("a[name=btn_show_adjust]").click(function() {
+		$("input[name^=adjust_]").show();
+		$("a[name=btn_show_adjust]").hide();
+		$("a[name=btn_hide_adjust]").show();
+	});
+	$("a[name=btn_hide_adjust]").click(function() {
+		$("input[name^=adjust_]").hide();
+		$("a[name=btn_show_adjust]").show();
+		$("a[name=btn_hide_adjust]").hide();
+	});
+});
+</script>
 </body>

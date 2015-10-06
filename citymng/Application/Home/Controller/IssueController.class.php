@@ -319,7 +319,11 @@ class IssueController extends GlobalController {
 		$target_list = $TargetEvent->getTargetList($this->city['city_id'], 0);
 		$this->assign('target_list', $target_list);
 		
+		$IssueEvent = A('Issue', 'Event');
 		$status_list = M('IssueStatus')->select();
+		foreach($status_list as $key=>$row) {
+				$status_list[$key]['name'] = $IssueEvent->getStatusName($row['status_id'], $this->user['user_type_id'], $row['name']);
+		}
 		$this->assign('status_list', $status_list);
 		
 		$this->assign('title', '高级搜索');
@@ -378,6 +382,10 @@ class IssueController extends GlobalController {
 				'start_date' 	=> NULL,
 				'end_date'		=> NULL
 			);
+		}else if ($mode == 'setvp') {
+			$data = array(
+				'is_vp' => 1
+			);
 		}else {
 			$json['status'] = false;
 			$this->ajaxReturn($json);
@@ -413,9 +421,9 @@ class IssueController extends GlobalController {
 				exit;
 			}
 			if ($new_status_id > 0) {
-				$status = M('IssueStatus')->where(array('status_id'=>$new_status_id))->find();
+				$status = M('IssueStatus')->where(array('status_id'=>$new_status_id))->find();//dump($status);
 				if (!empty($status)) {
-					if ($status['status_id'] == 3 && $this->user['user_type_id'] >= 20) $status['name'] = '待处理';
+					$status['name'] = $IssueEvent->getStatusName($status['status_id'], $this->user['user_type_id'], $status['name']);
 					$reply_text = '[' . $status['name'] . ']' . $reply_text;
 				}
 			}
@@ -458,7 +466,12 @@ class IssueController extends GlobalController {
 			}
 		}
 		
-		echo '<script>parent.alert("操作成功"); parent.detail(' . $info['id'] . ');</script>';
+		$html = '<script>parent.alert("操作成功"); parent.detail(' . $info['id'] . ');';
+		if (!empty($operation_id)) {
+			$html .= 'parent.document.getElementById("btn_search").click();';
+		}
+		$html .= '</script>';
+		echo $html;
 		exit;
 	}
 	
@@ -468,7 +481,18 @@ class IssueController extends GlobalController {
 		
 		$IssueEvent = A('Issue', 'Event');
 		$info = $IssueEvent->getIssueDetail($id);
+		$info['status_name'] = $IssueEvent->getStatusName($info['status_id'], $this->user['user_type_id'], $info['status_name']);
+		$info['last_mod_user'] = '';
+		$info['last_mod_user2'] = '';
+		if (!empty($info['last_mod_user_id'])) {
+			$info['last_mod_user'] = M('User')->getFieldById($info['last_mod_user_id'], 'username');
+		}
+		if (!empty($info['last_mod_user2_id'])) {
+			$info['last_mod_user2'] = M('User')->getFieldById($info['last_mod_user2_id'], 'username');
+		}
+		
 		$this->assign('info', $info);
+		$this->assign('current_user', $this->user);
 		
 		$reply_list = $IssueEvent->getReplyList($id,'text');
 		$attachment_list = $IssueEvent->getReplyList($id,'attachment');//dump($attachment_list);exit;
@@ -541,11 +565,16 @@ class IssueController extends GlobalController {
 			'编号',
 			'日期', '时间',
 			'区域', '类别', '街道', '道路名称',
-			'来源', '发现人', '指标代码',
+			'来源', 'checker'=>'发现人', '指标代码',
 			'一级指标', '二级指标', '三级指标',
-			'详细信息', '问题个数', '状态', '录入员',
+			'详细信息', '问题个数', '状态', 'username'=>'录入员',
 			'照片'
 		);
+		
+		if ($this->user['user_type_id'] >= 20) {
+			unset($cols['checker']);
+			unset($cols['username']);
+		}
 		
 		if ($mode == 'default' || $mode == 'with_img') {
 			$rows = array();
@@ -562,15 +591,22 @@ class IssueController extends GlobalController {
 					$row['area3'] = '';
 				}
 				
-				$rows[] = array(
+				$row['status_name'] = $IssueEvent->getStatusName($row['status_id'], $this->user['user_type_id'], $row['status_name']);
+				
+				$tmp = array(
 					$row['id'],
 					$row['date'], $row['time'], 
 					$row['area1'],$row['area2'],$row['area3'],$row['area4'],
-					$row['come_from'], $row['checker'], $row['target_code'],
+					$row['come_from'], 'checker'=>$row['checker'], $row['target_code'],
 					$row['target1'],$row['target2'],$row['target3'],
-					$row['des'],  $row['weight'], $row['status_name'], (!empty($user['username']) ? $user['username'] : ''),
+					$row['des'],  $row['weight'], $row['status_name'], 'username'=>(!empty($user['username']) ? $user['username'] : ''),
 					($mode == 'default' ? $img_value : $row['img'])
 				);
+				if ($this->user['user_type_id'] >= 20) {
+					unset($tmp['checker']);
+					unset($tmp['username']);
+				}
+				$rows[] = $tmp;
 			}
 			$ExcelEvent = A('Excel', 'Event');
 			$ExcelEvent->export($cols, $rows, '问题导出' . date('YmdHi'), 'issue_' . $mode);
@@ -640,7 +676,7 @@ class IssueController extends GlobalController {
 		$root_target_ids = I('get.target', '');
 		
 		if (empty($root_area_ids) || empty($root_target_ids)) {
-			$this->error('参数错误'); exit;
+			$this->error('请选择区、指标'); exit;
 		}
 		
 		$arr = explode(',', $root_area_ids);
@@ -742,5 +778,122 @@ class IssueController extends GlobalController {
 			}
 		}
 		return $res;
+	}
+	
+	// just for super admin
+	public function superMng() {
+		if ($this->user['user_type_id'] != 19) {
+			$this->error('无权限访问');
+		}
+		/*
+		if (strtoupper($_SERVER['REQUEST_METHOD']) == 'POST') {
+			$data = array();
+			$data['page'] = I('post.page', 1);
+			$data['rows'] = I('post.rows', 20);
+			$data['sort'] = I('post.sort', 'id');
+			$data['order_by'] = I('post.order', 'ASC');
+			
+			$data['city_id'] = $this->city['city_id'];
+			$data['advance'] = true;
+			
+			$id = I('post.id', 0);
+			$status_id = I('post.status_id', 0);
+			$area_id = I('post.area_id', 0);
+			$target_id = I('post.target_id', 0);
+			$area_names = I('post.area_names', '');
+			$target_names = I('post.target_names', '');
+			$start_date = I('post.start_date', '');
+			$end_date = I('post.end_date', '');
+			!empty($id) && $data['id'] = $id;
+			!empty($status_id) && $data['status_id'] = $status_id;
+			!empty($start_date) && $data['exm_start_date'] = $start_date;
+			!empty($end_date) && $data['exm_end_date'] = $end_date;
+			
+			if (!empty($area_id)) {
+				$data['area_id'] = $area_id;
+			}else if (!empty($area_names)) {
+				$arr = explode(',', $area_names);
+				foreach($arr as $k=>$v) {
+					$data['area' . ($k+1)] = $v;
+				}
+			}
+			
+			if (!empty($target_id)) {
+				$data['target_id'] = $target_id;
+			}else if (!empty($target_names)) {
+				$arr = explode(',', $target_names);
+				foreach($arr as $k=>$v) {
+					$data['target' . ($k+1)] = $v;
+				}
+			}
+			//print_r($data);exit;
+			$IssueEvent = A('Issue', 'Event');
+			
+			$res = $IssueEvent->getIssueList($data);
+				
+			echo $this->generateDataForDataGrid($res['total'], $res['data']);
+			exit;
+		}*/
+		$AreaEvent = A('Area', 'Event');
+		$area_list = $AreaEvent->getAreaList($this->city['city_id'], 0);
+		$this->assign('area_list', $area_list);
+		
+		$TargetEvent = A('Target', 'Event');
+		$target_list = $TargetEvent->getTargetList($this->city['city_id'], 0);
+		$this->assign('target_list', $target_list);
+		
+		$IssueEvent = A('Issue', 'Event');
+		$status_list = M('IssueStatus')->select();
+		foreach($status_list as $key=>$row) {
+				$status_list[$key]['name'] = $IssueEvent->getStatusName($row['status_id'], $this->user['user_type_id'], $row['name']);
+		}
+		$this->assign('status_list', $status_list);
+		
+		$this->assign('title', '数据管理');
+		$this->display('Issue:superMng');
+	}
+	public function superCheck() {
+		$json = array(
+			'status' => true,
+			'error'	=> ''
+		);
+		$ids = I('post.ids', '');
+		$mode = I('post.mode');
+		
+		if ($mode != 'delete') {
+			$json['status'] = false;
+			$json['error'] = '参数错误';
+			$this->ajaxReturn($json);
+		}
+		
+		$cond = array(
+			'id' => array('in', explode(',', $ids))
+		);
+		$flag = true;
+		M('Issue')->startTrans();
+		
+		$stat = M('Issue')->where($cond)->delete();
+		if (false === $stat) {
+			$flag = false;
+		}
+		
+		if ($flag) {
+			$cond = array(
+				'issue_id' => array('in', explode(',', $ids))
+			);
+			$stat = M('IssueReply')->where($cond)->delete();
+			if (false === $stat) {
+				$flag = false;
+			}
+		}
+		
+		if ($flag) {
+			M('Issue')->commit();
+		}else {
+			M('Issue')->rollback();
+			$json['status'] = false;
+		}
+		
+		$this->ajaxReturn($json);
 	}
 }

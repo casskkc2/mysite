@@ -18,6 +18,13 @@ class BaseController extends Controller {
 		if (!empty($bulletin)) {
 			$this->assign('bulletin', $bulletin['content']);
 		}
+		
+		$logged = 0;
+		if (session('?user')) {
+			$this->assign('current_user', session('user'));
+			$logged = 1;
+		}
+		$this->assign('logged', $logged);
 	}
 	
 	protected function generateDataForDataGrid($total, $data) {

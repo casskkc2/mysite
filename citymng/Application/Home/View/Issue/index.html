@@ -113,6 +113,14 @@
 				handler:function(){ doCheck('nopass'); }
 			});
 			</if>
+			
+			<if condition="isset($tools['setvp'])">
+			toolbar.push({
+				text:'设为重点',
+				iconCls:'icon-tip',
+				handler:function(){ doCheck('setvp'); }
+			});
+			</if>
 		</script>
 		<script type="text/javascript">	
 			var pos = null;
@@ -239,6 +247,7 @@
 					dataType: 'json',
 					success: function(res) {
 						if (res["status"]) {
+							alert('操作成功');
 							$("#btn_search").click();
 						}else {
 							alert('操作失败');

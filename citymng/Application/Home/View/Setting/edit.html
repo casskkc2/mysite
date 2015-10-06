@@ -1,0 +1,51 @@
+<include file="Common/header" />
+<link href="__PUBLIC__/javascript/jqueryValidate/css/cmxform.css" rel="stylesheet" type="text/css" />
+<script src="__PUBLIC__/javascript/jqueryValidate/jquery.validate.js"></script>
+<script src="__PUBLIC__/javascript/jqueryValidate/jquery.metadata.js"></script>
+		<div class="box">
+			<div class="content" style="width:1002px">
+			<form id="formSubmit" action="__SELF__" method="POST">
+				<table class="form2">
+					<tbody>
+					<volist name="setting_keys" id="vo">
+					<tr>
+					  <td align="right">{$vo.title}：</td>
+					  <td align="left">
+						<input type="text" name="{$vo.key}" size="10" data-rule-required="true" data-msg-required="不能为空" value="{$vo.value}" />&nbsp;{$vo.suffix}
+					  </td>
+					</tr>
+					</volist>
+					<tr>
+					  <td align="right"></td>
+					  <td align="left">
+						<a id="btn_submit" class="button">提交</a>
+					  </td>
+					</tr>
+				  </tbody>
+				 </table>
+			</form>
+			</div>
+		</div>
+		<script type="text/javascript">
+			$(function() {
+				$("#btn_submit").click(function(){
+					$("#formSubmit").submit();            
+				});
+				
+				$("#formSubmit").validate({
+					/*rules: {
+						newpwd2: {
+							required: true,
+							confirmPwd: true
+						}
+					},
+					messages: {
+						newpwd2: {
+							required: "请输入确认密码",
+							confirmPwd: "两次输入的密码不一致"
+						}
+					}*/
+				});
+			});
+		</script>
+<include file="Common/footer" />

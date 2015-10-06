@@ -164,17 +164,17 @@ class UserController extends GlobalController {
 		!empty($filter_date_end) && $cond['a.create_time'] = array('elt', $filter_date_end . ' 23:59:59');
 		$list = M('LoginHistory')->alias('a')
 			->join('user b ON a.user_id=b.id')
-			->field('a.*, b.username, b.smartphone')
+			->field('a.*, b.username, b.department')
 			->where($cond)
 			->order('a.create_time ASC')
 			->select();
 		$cols = array(
-			'用户名', '电话', '登录时间', '登录IP'
+			'用户名', '部门', '登录时间', '登录IP'
 		);
 		$rows = array();
 		foreach($list as $row) {
 			$rows[] = array(
-				$row['username'], $row['smartphone'], $row['create_time'], $row['ip']
+				$row['username'], $row['department'], $row['create_time'], $row['ip']
 			);
 		}
 		if (!empty($rows)) {

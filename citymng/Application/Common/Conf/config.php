@@ -15,5 +15,12 @@ return array(
 	'UPLOAD_DIR' => 'upload/',
 	'DOWNLOAD_DIR' => 'download/', // for image zip
 	
+	//'HTTP_SERVER' => 'http://' . $_SERVER['SERVER_NAME'] . ($_SERVER['SERVER_PORT']=='80' ? '' : ':' . $_SERVER['SERVER_PORT']) . '/citymng/trunk/citymng/',
 	'HTTP_SERVER' => 'http://' . $_SERVER['SERVER_NAME'] . ($_SERVER['SERVER_PORT']=='80' ? '' : ':' . $_SERVER['SERVER_PORT']) . '/',
+	
+	'CONFIG_SETTING' => array(
+		'config_exp_days'			=> array('key'=>'config_exp_days', 'title'=>'过期天数', 'suffix'=>'天'),
+		'config_change_pwd_alert'	=> array('key'=>'config_change_pwd_alert', 'title'=>'是否提示修改密码', 'suffix'=>'0 不提示，1 提示'),
+		'config_change_pwd_interval'=> array('key'=>'config_change_pwd_interval', 'title'=>'提示修改密码的间隔', 'suffix'=>'天'),
+	),
 );

@@ -9,49 +9,88 @@
 			<td>{$info.id}</td>
 		</tr>
 		<tr>
-			<td>区域街道</td>
-			<td>{$info.area_text}</td>
+			<td>区域</td>
+			<td>{$info.area1}</td>
+		</tr>
+		<tr>
+			<td>类别</td>
+			<td>{$info.area2}</td>
+		</tr>
+		<tr>
+			<td>街</td>
+			<td><if condition="$info['area4'] eq ''"><else />{$info.area3}</if></td>
+		</tr>
+		<tr>
+			<td>道路</td>
+			<td><if condition="$info['area4'] eq ''">{$info.area3}<else />{$info.area4}</if></td>
+		</tr>
+		<tr>
+			<td>详细描述</td>
+			<td>{$info.des}</td>
 		</tr>
 		<tr>
 			<td>指标代码</td>
 			<td>{$info.target_code}</td>
 		</tr>
 		<tr>
-			<td>指标名称</td>
-			<td>{$info.target_text}</td>
+			<td>一级指标</td>
+			<td>{$info.target1}</td>
+		</tr>
+		<tr>
+			<td>二级指标</td>
+			<td>{$info.target2}</td>
+		</tr>
+		<tr>
+			<td>三级指标</td>
+			<td>{$info.target3}</td>
 		</tr>
 		<tr>
 			<td>计数</td>
 			<td>{$info.weight}</td>
 		</tr>
 		<tr>
-			<td>标题</td>
-			<td>{$info.title}</td>
+			<td>检查日期</td>
+			<td>{$info.date}</td>
+		</tr>
+		<tr>
+			<td>检查时间</td>
+			<td>{$info.time}</td>
+		</tr>
+		<tr>
+			<td>状态</td>
+			<td>{$info.status_name}</td>
+		</tr>
+		<if condition="$current_user['user_type_id'] lt 20">
+		<tr>
+			<td>发现人</td>
+			<td>{$info.checker}</td>
 		</tr>
 		<tr>
 			<td>录入员</td>
 			<td>{$info.username}</td>
 		</tr>
 		<tr>
-			<td>发现人</td>
-			<td>{$info.checker}</td>
+			<td>最后修改用户</td>
+			<td>{$info.last_mod_user}</td>
+		</tr>
+		</if>
+		<tr>
+			<td>位置信息</td>
+			<td>
+				经度：{$info.lng}<br />
+				纬度：{$info.lat}
+			</td>
 		</tr>
 		<tr>
-			<td>检查日期</td>
-			<td>{$info.date}</td>
+			<td>最后回复用户</td>
+			<td>{$info.last_mod_user2}</td>
 		</tr>
-		<tr>
-			<td>状态</td>
-			<td>{$info.status_name}</td>
-		</tr>
+		<!--
 		<tr>
 			<td>来源</td>
 			<td>{$info.come_from}</td>
-		</tr>
-		<tr>
-			<td>详细描述</td>
-			<td>{$info.des}</td>
-		</tr>
+		</tr>-->
+		
 	</table>
 	<br />
 	<div style="text-align:right;">

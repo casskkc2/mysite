@@ -1,0 +1,61 @@
+<include file="Common/header" />
+<link href="__PUBLIC__/javascript/jqueryValidate/css/cmxform.css" rel="stylesheet" type="text/css" />
+<script src="__PUBLIC__/javascript/jqueryValidate/jquery.validate.js"></script>
+<script src="__PUBLIC__/javascript/jqueryValidate/jquery.metadata.js"></script>
+		<div class="box">
+			<div class="content" style="width:1002px">
+			<form id="formSubmit" action="__SELF__" method="POST">
+				<table class="form2">
+					<tbody>
+					<tr>
+					  <td align="right">问题：</td>
+					  <td align="left">
+						<input type="text" name="title" size="100" data-rule-required="true" data-msg-required="请输入问题" value="{$info.title}" />
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right">回答：</td>
+					  <td align="left">
+						<textarea name="answer" cols="50" rows="5" data-rule-required="true" data-msg-required="请输入回答">{$info.answer}</textarea>
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right">排序：</td>
+					  <td align="left">
+						<input type="text" name="sort" size="10" value="{$info.sort|default=0}" />
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right"></td>
+					  <td align="left">
+						<a id="btn_submit" class="button">提交</a>
+					  </td>
+					</tr>
+				  </tbody>
+				 </table>
+			</form>
+			</div>
+		</div>
+		<script type="text/javascript">
+			$(function() {
+				$("#btn_submit").click(function(){
+					$("#formSubmit").submit();            
+				});
+				
+				$("#formSubmit").validate({
+					/*rules: {
+						newpwd2: {
+							required: true,
+							confirmPwd: true
+						}
+					},
+					messages: {
+						newpwd2: {
+							required: "请输入确认密码",
+							confirmPwd: "两次输入的密码不一致"
+						}
+					}*/
+				});
+			});
+		</script>
+<include file="Common/footer" />
