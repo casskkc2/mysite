@@ -102,7 +102,7 @@ class TargetController extends GlobalController {
 	}
 	
 	public function deleteNode() {
-		$res = array('status'=>0, 'error'=>'');
+		$res = array('status'=>0, 'rcode'=>1, 'error'=>'');
 		
 		$id = I('post.id', 0);
 		if (empty($id)) {
@@ -110,9 +110,17 @@ class TargetController extends GlobalController {
 			$this->ajaxReturn($res);
 		}
 		
-		$cond = array('id'=>$id);
-		$data = array('status' => 1);
-		$stat = M('Target')->where($cond)->data($data)->save();
+		$cond = array('target_id'=>$id);
+		$count = M('Issue')->where($cond)->count();
+		if ($count > 0) { // 
+			$cond = array('id'=>$id);
+			$data = array('status' => 1);
+			$stat = M('Target')->where($cond)->data($data)->save();
+		}else {
+			$cond = array('id'=>$id);
+			$stat = M('Target')->where($cond)->delete();
+			$res['rcode'] = 2;
+		}
 		if (false === $stat) {
 			$res['error'] = '删除失败';
 			$this->ajaxReturn($res);

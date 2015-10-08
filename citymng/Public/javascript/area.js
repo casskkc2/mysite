@@ -112,7 +112,7 @@ function deleteNode(url, id, callback) {
 		data: {id: id},
 		dataType: 'json',
 		success: function(json) {
-			callback(json.error);
+			callback(json.error, json);
 		},
 		error: function(xhr, ajaxOptions, thrownError) {
 			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);

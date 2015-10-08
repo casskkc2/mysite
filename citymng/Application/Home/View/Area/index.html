@@ -157,17 +157,21 @@
 							return false;
 						}
 						
-						deleteNode(ROOT + '/Area/deleteNode', node.id, function(err) {
+						deleteNode(ROOT + '/Area/deleteNode', node.id, function(err, res) {
 							if (err != '') {
 								alert(err);
 								return false;
 							}
-							$("#tree").tree("update", {
-								target:node.target,
-								iconCls: 'tree-file tree-dnd-no',
-								attributes: $.extend({}, node.attributes, {'status':1, 'status_text':status_arr[1]})
-							});
-							$("#tree").tree("select", node.target);
+							if (res['rcode'] == 1) {
+								$("#tree").tree("update", {
+									target:node.target,
+									iconCls: 'tree-file tree-dnd-no',
+									attributes: $.extend({}, node.attributes, {'status':1, 'status_text':status_arr[1]})
+								});
+								$("#tree").tree("select", node.target);
+							}else {
+								$("#tree").tree("remove", node.target);
+							}
 						});
 					});
 				});
