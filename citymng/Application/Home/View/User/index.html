@@ -58,6 +58,17 @@
 		<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=33FqAaSCIdSeYDQOVXYoV4f5"></script>
 		<script type="text/javascript">
 			var current_city = "{$current_city.city}";
+			var toolbar = [];
+			toolbar.push({
+				text:'删除',
+				iconCls:'icon-no',
+				handler:function(){ 
+					if(confirm('删除后无法恢复，确定要删除吗？')) {
+						doCheck('delete'); 
+					}
+				}
+			});
+			
 			var pos_list = [];
 			$("#user_tb").datagrid({
 				url: ROOT + '/User/jsondata',
@@ -73,9 +84,10 @@
 				checkOnSelect: true,
 				pageList: [20, 40, 60, 80],
 				//fitColumns: true,
-				//toolbar: "#tb",
+				toolbar: toolbar,
 				columns:[[
 					//{field:'id',title:'id', hidden:true},
+					{field:'aid',title:'', checkbox:true},
 					{field:'username',title:'用户名',width:100},
 					{field:'department',title:'部门',width:100},
 					{field:'city_name',title:'城市',width:110},
@@ -256,5 +268,38 @@
 				$("#user_tb").datagrid("load", params);
 			});
 		});
+		
+			function doCheck(mode) {
+				var rows = $("#user_tb").datagrid('getChecked');
+				if(rows.length == 0) {
+					alert('请选择要操作的记录');
+					return false;
+				}
+				var ids = [];
+				for(var i=0; i<rows.length; i++) {
+					ids.push(rows[i].id);
+				}
+				var params = {
+					ids: ids.join(),
+					mode: mode
+				};
+				$.ajax({
+					url: ROOT + "/User/doCheck",
+					type: "post",
+					data: params,
+					dataType: 'json',
+					success: function(res) {
+						if (res["status"]) {
+							alert('操作成功');
+							$("#user_tb").datagrid('reload');
+						}else {
+							alert('操作失败');
+						}
+					},
+					error: function(xhr, ajaxOptions, thrownError) {
+						alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+					}
+				});
+			}
 		</script>
 <include file="Common/footer" />

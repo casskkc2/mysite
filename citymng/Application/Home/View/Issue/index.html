@@ -285,7 +285,7 @@
 				window.open(url);
 			}
 			function doSummaryExport() {
-				var url = ROOT + '/Issue/exportSummary';
+				var url = ROOT + '/Issue/exportSummary/status/' + status;;
 				
 				var filter_date_start = $("#filter_date_start2").datebox("getValue");
 				if (filter_date_start) {

@@ -128,6 +128,7 @@ class UserController extends GlobalController {
 		$list = M('User')->alias('u')
 			->field('
 				u.*, 
+				u.id AS aid,
 				ut.type_name AS user_type_name,
 				c.city AS city_name')
 			->join('INNER JOIN user_type ut ON u.user_type_id=ut.user_type_id')
@@ -205,5 +206,29 @@ class UserController extends GlobalController {
 		}
 		
 		$this->ajaxReturn($res);
+	}
+	
+	public function doCheck() {
+		$json = array(
+			'status' => true,
+			'error'	=> ''
+		);
+		$ids = I('post.ids', '');
+		$mode = I('post.mode');
+		
+		if (strcmp($mode, 'delete') != 0) {
+			$json['error'] = '参数错误';
+			$json['status'] = false;
+			$this->ajaxReturn($json);
+		}
+		
+		$cond = array(
+			'id' => array('in', explode(',', $ids))
+		);
+		$stat = M('User')->where($cond)->delete();
+		if (false === $stat) {
+			$json['status'] = false;
+		}
+		$this->ajaxReturn($json);
 	}
 }

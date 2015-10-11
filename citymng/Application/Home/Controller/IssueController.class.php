@@ -394,6 +394,7 @@ class IssueController extends GlobalController {
 		$cond = array(
 			'id' => array('in', explode(',', $ids))
 		);
+		$data['last_mod_user_id'] = $this->user['id'];
 		$stat = M('Issue')->where($cond)->data($data)->save();
 		if (false === $stat) {
 			$json['status'] = false;
@@ -674,6 +675,7 @@ class IssueController extends GlobalController {
 		$start_date = I('get.filter_date_start', '');
 		$end_date = I('get.filter_date_end', '');
 		$root_target_ids = I('get.target', '');
+		$status = I('get.status', 0);
 		
 		if (empty($root_area_ids) || empty($root_target_ids)) {
 			$this->error('请选择区、指标'); exit;
@@ -703,9 +705,13 @@ class IssueController extends GlobalController {
 		//$target_list = M('Target')->where($cond)->order('path, sort')->select();
 		//var_export($target_list);exit;
 		$target_data = buildTree($target_list);
+		$target_data[] = array(
+			'id'	=> 'col_smry',
+			'text'	=> '合计'
+		);
 		//var_export($target_data);exit;
 		getSummaryColsFromTreeData($target_data);
-		//var_export($target_data);//exit;
+		//var_export($target_data);exit;
 		$target_max = getMaxDimensionOfTreeData($target_data);
 		//echo $target_max;exit;
 		$leaf_target = getLeafNodesFromTreeData($target_data);
@@ -725,6 +731,11 @@ class IssueController extends GlobalController {
 		!empty($start_date) && $examine_time_cond[]= array('egt', $start_date);
 		!empty($examine_time_cond) && $where['examine_time'] = $examine_time_cond;
 		
+		$IssueEvent = A('Issue', 'Event');
+		if(!empty($status)) {
+			$IssueEvent->statusToQueryCondition($status, $where);
+		}
+		
 		$data = array();
 		$list = M('Issue')
 			->field('SUM(weight) AS sum_weight, area_id, target_id')
@@ -733,6 +744,11 @@ class IssueController extends GlobalController {
 			->select();
 		foreach($list as $row) {
 			$data[$row['area_id']][$row['target_id']] = $row['sum_weight'];
+			if (isset($data[$row['area_id']]['col_smry'])) {
+				$data[$row['area_id']]['col_smry'] += $row['sum_weight'];
+			}else {
+				$data[$row['area_id']]['col_smry'] = $row['sum_weight'];
+			}
 		}
 		//var_export($data);
 		$smry_total = array();
