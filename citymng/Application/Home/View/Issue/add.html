@@ -217,6 +217,18 @@
 				$("#formSubmit").validate({
 					submitHandler: function(form) {
 						if ( !$("#formSubmit").form("validate") ) return false;
+						var flag = true;
+						$("[id^=reply_]").each(function() {
+							if ( $(this).val() == "") {
+								alert("请上传附件");
+								$(this).css("border", "1px dotted red");
+								flag = false;
+								return false;
+							}else {
+								$(this).css("border", "1px solid black");
+							}
+						});
+						if (!flag) return false;
 						form.submit();
 					},
 					rules: {
@@ -227,7 +239,7 @@
 						target_id: {
 							required: true,
 							min: 1
-						}
+						},
 					},
 					messages: {
 						area_id: {

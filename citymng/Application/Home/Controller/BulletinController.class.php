@@ -12,7 +12,7 @@ class BulletinController extends GlobalController {
 		if ($_POST) {
 			$content = I('post.content', '');
 			
-			$info = M('Bulletin')->find();
+			$info = M('Bulletin')->where(array('city_id'=>$this->city['city_id']))->find();
 			if (!empty($info)) {
 				$data = array(
 					'id'		=> $info['id'],

@@ -25,6 +25,26 @@ class GlobalController extends BaseController {
 		if (!empty($bulletin)) {
 			$this->assign('bulletin', $bulletin['content']);
 		}
+		
+		$AreaEvent = A('Area', 'Event');
+		$areaList = $AreaEvent->getAreaListByIds($this->city['city_id'], $this->area_arr);
+		$all_area_arr = $this->area_arr;
+		foreach($areaList as $row) {
+			$all_area_arr = array_merge($all_area_arr, treePathToArray($row['path']));
+		}
+		$all_area_arr = array_unique($all_area_arr);
+		//print_r($all_area_arr);exit;
+		$this->all_area_arr = $all_area_arr;
+		
+		$TargetEvent = A('Target', 'Event');
+		$targetList = $TargetEvent->getTargetsByIds($this->target_arr);
+		$all_target_arr = $this->target_arr;
+		foreach($targetList as $row) {
+			$all_target_arr = array_merge($all_target_arr, treePathToArray($row['path']));
+		}
+		$all_target_arr = array_unique($all_target_arr);
+		//print_r($all_target_arr);exit;
+		$this->all_target_arr = $all_target_arr;
 	}
 	
 	/*

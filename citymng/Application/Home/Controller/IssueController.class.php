@@ -12,18 +12,22 @@ class IssueController extends GlobalController {
 		$IssueEvent = A('Issue', 'Event');
 		$tabs = $IssueEvent->getTabs($this->user['user_type_id']);//print_r($tabs);exit;
 		
-		empty($status_id) && $status_id = $tabs[0]['st'];
+		if (empty($status_id)) {
+			$arr = array_slice($tabs, 0, 1);
+			//var_dump($arr);exit;
+			$status_id = $arr[0]['st'];
+		}
 		
 		$tools = $IssueEvent->getPassBtns($status_id, $this->user['user_type_id']);
 		$this->assign('tabs', $tabs);
 		$this->assign('tools', $tools);
 		
 		$AreaEvent = A('Area', 'Event');
-		$area_list = $AreaEvent->getAreaList($this->city['city_id'], 0);
+		$area_list = $AreaEvent->getAreaList($this->city['city_id'], 0, $this->all_area_arr);
 		$this->assign('area_list', $area_list);
 		
 		$TargetEvent = A('Target', 'Event');
-		$target_list = $TargetEvent->getTargetList($this->city['city_id'], 0);
+		$target_list = $TargetEvent->getTargetList($this->city['city_id'], 0, $this->all_target_arr);
 		$this->assign('target_list', $target_list);
 		
 		$this->assign('title', '问题管理');
@@ -87,7 +91,7 @@ class IssueController extends GlobalController {
 						'error' => $_FILES['reply_img']['error'][$img_i],
 						'size' => $_FILES['reply_img']['size'][$img_i],
 					);
-					$file_info = $this->_upload2($file, false, 0, 0, 'no_limit');
+					$file_info = $this->_upload2($file, false, 0, 0, '');
 					if (is_array($file_info)) { // upload successfully
 						if ($img_i == 0) {
 							$data['img'] = $file_info['file_path'];
@@ -107,6 +111,22 @@ class IssueController extends GlobalController {
 					);
 					$video_i++;
 				}
+			}
+			
+			if(!empty($upload_error)) {
+				foreach($replies as $v) {
+					if ($v['type'] == 2) {
+						@unlink($v['path']);
+					}
+				}
+				$err_no = 0;
+				$err_msg = '';
+				foreach($upload_error as $k=>$err) {
+					$err_no = $k;
+					$err_msg = $err;
+					break;
+				}
+				$this->error('第' . $err_no . '个附件上传失败:' . $err_msg, 'javascript:history.back(-1);', 5);
 			}
 			
 			$id = M('Issue')->data($data)->add();
@@ -142,11 +162,11 @@ class IssueController extends GlobalController {
 		$this->assign('title', '问题上报');
 		
 		$AreaEvent = A('Area', 'Event');
-		$area_list = $AreaEvent->getAreaList($this->city['city_id'], 0);
+		$area_list = $AreaEvent->getAreaList($this->city['city_id'], 0, $this->all_area_arr);
 		$this->assign('area_list', $area_list);
 		
 		$TargetEvent = A('Target', 'Event');
-		$target_list = $TargetEvent->getTargetList($this->city['city_id'], 0);
+		$target_list = $TargetEvent->getTargetList($this->city['city_id'], 0, $this->all_target_arr);
 		$this->assign('target_list', $target_list);
 		
 		$this->display();
@@ -159,7 +179,7 @@ class IssueController extends GlobalController {
 		if (empty($pid)) exit('');
 		
 		$AreaEvent = A('Area', 'Event');
-		$area_list = $AreaEvent->getAreaList($this->city['city_id'], $pid);
+		$area_list = $AreaEvent->getAreaList($this->city['city_id'], $pid, $this->all_area_arr);
 		
 		if (empty($area_list)) exit('');
 		
@@ -176,7 +196,7 @@ class IssueController extends GlobalController {
 		if (empty($pid)) exit('');
 		
 		$TargetEvent = A('Target', 'Event');
-		$target_list = $TargetEvent->getTargetList($this->city['city_id'], $pid);
+		$target_list = $TargetEvent->getTargetList($this->city['city_id'], $pid, $this->all_target_arr);
 		
 		if (empty($target_list)) exit('');
 		
@@ -251,11 +271,11 @@ class IssueController extends GlobalController {
 		$this->assign('info', $info);
 		
 		$AreaEvent = A('Area', 'Event');
-		$area_list = $AreaEvent->getAreaList($this->city['city_id'], 0);
+		$area_list = $AreaEvent->getAreaList($this->city['city_id'], 0, $this->all_area_arr);
 		$this->assign('area_list', $area_list);
 		
 		$TargetEvent = A('Target', 'Event');
-		$target_list = $TargetEvent->getTargetList($this->city['city_id'], 0);
+		$target_list = $TargetEvent->getTargetList($this->city['city_id'], 0, $this->all_target_arr);
 		$this->assign('target_list', $target_list);
 		
 		$this->assign('title', '编辑问题');
@@ -312,11 +332,11 @@ class IssueController extends GlobalController {
 			exit;
 		}
 		$AreaEvent = A('Area', 'Event');
-		$area_list = $AreaEvent->getAreaList($this->city['city_id'], 0);
+		$area_list = $AreaEvent->getAreaList($this->city['city_id'], 0, $this->all_area_arr);
 		$this->assign('area_list', $area_list);
 		
 		$TargetEvent = A('Target', 'Event');
-		$target_list = $TargetEvent->getTargetList($this->city['city_id'], 0);
+		$target_list = $TargetEvent->getTargetList($this->city['city_id'], 0, $this->all_target_arr);
 		$this->assign('target_list', $target_list);
 		
 		$IssueEvent = A('Issue', 'Event');
@@ -338,10 +358,10 @@ class IssueController extends GlobalController {
 		$data['order_by'] = I('post.order', 'ASC');
 		
 		$data['city_id'] = $this->city['city_id'];
-		if ( !in_array($this->user['user_type_id'], array(10, 20)) ) {
+		//if ( !in_array($this->user['user_type_id'], array(10, 20)) ) {
 			$data['area'] = $this->user['area'];
 			$data['target'] = $this->user['target'];
-		}
+		//}
 		
 		$keywords = I('post.keywords', '');
 		//$keywords = I('get.keywords', '');
@@ -683,7 +703,7 @@ class IssueController extends GlobalController {
 		
 		$arr = explode(',', $root_area_ids);
 		$AreaEvent = A('Area', 'Event');
-		$area_list = $AreaEvent->getAreaAndChildrenByIds($this->city['city_id'], $arr);
+		$area_list = $AreaEvent->getAreaAndChildrenByIds($this->city['city_id'], $arr, $this->all_area_arr);
 		//var_export($area_list);
 		$area_data = buildTree($area_list);
 		//var_export($area_data);exit;
@@ -700,7 +720,7 @@ class IssueController extends GlobalController {
 		
 		$arr = explode(',', $root_target_ids);
 		$TargetEvent = A('Target', 'Event');
-		$target_list = $TargetEvent->getTargetAndChildrenByIds($this->city['city_id'], $arr);
+		$target_list = $TargetEvent->getTargetAndChildrenByIds($this->city['city_id'], $arr, $this->all_target_arr);
 		//$cond = array('city_id'=>$this->city['city_id']);
 		//$target_list = M('Target')->where($cond)->order('path, sort')->select();
 		//var_export($target_list);exit;
