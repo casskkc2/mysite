@@ -16,6 +16,7 @@ class BulletinController extends GlobalController {
 			if (!empty($info)) {
 				$data = array(
 					'id'		=> $info['id'],
+					'city_id'		=> $this->city['city_id'],
 					'content'	=> $content
 				);
 				$stat = M('Bulletin')->data($data)->save();
@@ -25,6 +26,7 @@ class BulletinController extends GlobalController {
 			}else {				
 				$data = array(
 					'content'	=> $content,
+					'city_id'		=> $this->city['city_id'],
 					'create_time' => date("Y-m-d H:i:s")
 				);
 				$id = M('Bulletin')->data($data)->add();
@@ -35,7 +37,7 @@ class BulletinController extends GlobalController {
 			$this->success('编辑公告成功', U('Home/Bulletin/edit'), 3);
 		}
 		
-		$info = M('Bulletin')->find();
+		$info = M('Bulletin')->where(array('city_id'=>$this->city['city_id']))->find();
 		$this->assign('info', $info);
 		
 		$this->assign('title', '编辑公告');

@@ -20,6 +20,11 @@ class GlobalController extends BaseController {
 		
 		$this->assign('current_user', $this->user);
 		$this->assign('current_city', $this->city);
+		
+		$bulletin = M('Bulletin')->where(array('city_id'=>$this->city['city_id']))->find();
+		if (!empty($bulletin)) {
+			$this->assign('bulletin', $bulletin['content']);
+		}
 	}
 	
 	/*
