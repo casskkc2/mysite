@@ -4,7 +4,7 @@ use Think\Controller;
 class BulletinController extends GlobalController {
 	function _initialize(){
 		parent::_initialize();
-		if ($this->user['user_type_id'] != 10) {
+		if ($this->user['user_type_id'] != 10 && $this->user['user_type_id'] != 12) {
 			$this->error('无权限访问');
 		}
 	}

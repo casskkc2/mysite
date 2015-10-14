@@ -14,10 +14,11 @@ class BaseController extends Controller {
 			}
 		}
 		
-		$bulletin = M('Bulletin')->find();
+		/*$bulletin = M('Bulletin')->find();
 		if (!empty($bulletin)) {
 			$this->assign('bulletin', $bulletin['content']);
-		}
+		}*/
+		$this->assign('bulletin', '');
 		
 		$logged = 0;
 		if (session('?user')) {

@@ -101,7 +101,7 @@ function login_onclick()
 		<div class="top_left">
 		<present name="bulletin">
 		<marquee width="550px" height="28px" direction="left" scrollamount="3"           onmouseover="this.stop()" onmouseout="this.start()">
-					公告：<span style="color:red">{$bulletin}</span>
+					<notempty name="bulletin">公告：<span style="color:red">{$bulletin}</span></notempty>
 				</marquee>
 		</present>
 		</div>
