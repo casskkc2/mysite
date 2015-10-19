@@ -8,7 +8,7 @@ class PublicController extends Controller {
 	
 	public function login() {
 		if ($_POST) {
-			$json = array('code'=>0, 'error'=>'', 'data'=>array());
+			$json = array('code'=>0, 'error'=>'', 'data'=>null);
 			
 			$username = I('post.username');
 			$password = I('post.password');
@@ -18,7 +18,8 @@ class PublicController extends Controller {
 				$json['error'] = $this->err['AUTH_FAIL'];
 				$json['code'] = 1;
 				
-				exit(json_encode($json));
+				//exit(json_encode($json));
+				$this->ajaxReturn($json, 'JSON');
 			}
 			$user_type = M('UserType')->where(array('user_type_id'=>$user['user_type_id']))->find();
 			$city = M('City')->alias('c')
@@ -28,8 +29,11 @@ class PublicController extends Controller {
 				->find();
 			session('user', $user);
 			session('city', $city);
+			$json['data'] = array();
 			$json['data']['user'] = $user;
 			$json['data']['city'] = $city;
+			$json['data']['area'] = M('Area')->field('id, name, path')->where(array('status'=>0, 'city_id'=>$user['city_id']))->order('sort')->select();
+			$json['data']['target'] = M('Target')->field('id, name, path')->where(array('status'=>0, 'city_id'=>$user['city_id']))->order('sort')->select();
 			
 			$data = array(
 				'last_login_ip' => $_SERVER['REMOTE_ADDR'],
@@ -45,8 +49,9 @@ class PublicController extends Controller {
 				'ip'		=> $_SERVER['REMOTE_ADDR']
 			);
 			M('LoginHistory')->data($data)->add();
-			
-			exit(json_encode($json));
+
+			//exit(json_encode($json));
+			$this->ajaxReturn($json, 'JSON');
 		}
 	}
 	/*
