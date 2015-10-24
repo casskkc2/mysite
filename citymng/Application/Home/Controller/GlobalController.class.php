@@ -21,6 +21,15 @@ class GlobalController extends BaseController {
 		$this->assign('current_user', $this->user);
 		$this->assign('current_city', $this->city);
 		
+		$setting = M('Setting')->where(array('city_id'=>$this->city['city_id']))->select();
+		foreach($setting as $row) {
+			if ($row['serialized'] == 1) {
+				$this->setting[$row['key']] = unserialize($row['value']);
+			}else{
+				$this->setting[$row['key']] = $row['value'];
+			}
+		}
+		
 		$bulletin = M('Bulletin')->where(array('city_id'=>$this->city['city_id']))->find();
 		if (!empty($bulletin)) {
 			$this->assign('bulletin', $bulletin['content']);

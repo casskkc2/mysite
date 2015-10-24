@@ -245,9 +245,15 @@ class IssueController extends GlobalController {
 				$data['tags'] .= $target['code'] . '|';
 			}
 			
+			$from_page_status = I('post.from_page_status', '');
+			
 			$stat = M('Issue')->data($data)->save();
 			if (false !== $stat) {
-				$this->success('修改问题成功', U('Home/Issue/index'), 3);
+				if (!empty($from_page_status)) {
+					$this->success('修改问题成功', U('Home/Issue/index', array('st'=>$from_page_status)), 3);
+				}else {
+					$this->success('修改问题成功', U('Home/Issue/index'), 3);
+				}
 			}
 			$this->error('修改问题失败', 'javascript:history.back(-1);', 5);
 		}
@@ -269,6 +275,7 @@ class IssueController extends GlobalController {
 		$this->assign('target_id_arr', $target_id_arr);
 		$this->assign('area_id_arr', $area_id_arr);
 		$this->assign('info', $info);
+		$this->assign('from_page_status', I('get.status', ''));
 		
 		$AreaEvent = A('Area', 'Event');
 		$area_list = $AreaEvent->getAreaList($this->city['city_id'], 0, $this->all_area_arr);

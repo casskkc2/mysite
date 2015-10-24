@@ -46,8 +46,17 @@ class PublicController extends BaseController {
 			);
 			M('LoginHistory')->data($data)->add();
 			
+			$setting = M('Setting')->where(array('city_id'=>$user['city_id']))->select();
+			foreach($setting as $row) {
+				if ($row['serialized'] == 1) {
+					$setting[$row['key']] = unserialize($row['value']);
+				}else{
+					$setting[$row['key']] = $row['value'];
+				}
+			}
+			
 			$change_pwd = false;
-			if ($this->setting['config_change_pwd_alert'] == 1) {
+			if (isset($setting['config_change_pwd_alert']) && $setting['config_change_pwd_alert'] == 1) {
 				if (empty($user['change_pwd_time'])) {
 					$change_pwd = true;
 				}else {
@@ -55,7 +64,7 @@ class PublicController extends BaseController {
 					$dt2 = new \DateTime('now');
 					$interval = $dt1->diff($dt2);
 					$n = $interval->format('%a');
-					if ($n >= $this->setting['config_change_pwd_interval']) {
+					if (isset($setting['config_change_pwd_interval']) && $n >= $setting['config_change_pwd_interval']) {
 						$change_pwd = true;
 					}
 				}

@@ -14,11 +14,16 @@ class SettingController extends GlobalController {
 			$setting_keys = C('CONFIG_SETTING');
 			foreach($_POST as $key=>$value) {
 				if (isset($setting_keys[$key])) {
-					$info = M('Setting')->where(array('key'=>$key))->find();
+					$cond = array(
+						'key'=>$key,
+						'city_id'=>$this->city['city_id']
+					);
+					$info = M('Setting')->where($cond)->find();
 					if (empty($info)) {
 						$data = array(
 							'key'	=> $key,
-							'value'	=> $value
+							'value'	=> $value,
+							'city_id' => $this->city['city_id']
 						);
 						M('Setting')->data($data)->add();
 					}else {
@@ -37,7 +42,7 @@ class SettingController extends GlobalController {
 		foreach($setting_keys as $key=>$value) {
 			$setting_keys[$key]['value'] = '';
 		}
-		$list = M('Setting')->select();
+		$list = M('Setting')->where(array('city_id'=>$this->city['city_id']))->select();
 		$settings = array();
 		foreach($list as $row) {
 			if (isset($setting_keys[$row['key']])) {

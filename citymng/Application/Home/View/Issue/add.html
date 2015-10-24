@@ -89,8 +89,9 @@
 					  <td align="left">
 						<if condition="!empty($info)">
 						<input type="hidden" name="id" value="{$info.id}" />
+						<input type="hidden" name="from_page_status" value="{$from_page_status}" />
 						</if>
-						<a id="btn_submit" class="button">提交</a>
+						<a id="btn_submit" class="<if condition="!empty($info)">button_gray<else />button</if>" >提交</a>
 					  </td>
 					</tr>
 				  </tbody>
@@ -99,6 +100,9 @@
 			</div>
 		</div>
 		<script>
+		var areaLoaded = false;
+		var targetLoaded = false;
+		
 		var area_id_arr = [];
 		var target_id_arr = [];
 		<if condition="!empty($info)">	
@@ -116,12 +120,14 @@
 			});
 		</if>
 		</script>
-		<script type="text/javascript">
-			$(function() {
-				$("#btn_submit").click(function(){
+		<script type="text/javascript">	
+			function enableSubmitBtn() {
+				$("#btn_submit").attr("class", "button")
+				.click(function(){
 					$("#formSubmit").submit();            
 				});
-				
+			}
+			$(function() {
 				$("#issueFormDiv").on("change", "select[id^=area_]", function() {
 					var c_a_id = $(this).val();	
 					
@@ -150,6 +156,10 @@
 									$("#area_name_" + j).remove();
 								}
 							});
+							areaLoaded = true;
+							if (targetLoaded && areaLoaded) {
+								enableSubmitBtn();
+							}
 							//setIssueTitle();
 						}
 					});
@@ -184,6 +194,10 @@
 									$("#target_name_" + j).remove();
 								}
 							});
+							targetLoaded = true;
+							if (targetLoaded && areaLoaded) {
+								enableSubmitBtn();
+							}
 							//setIssueTitle();
 						}
 					});
@@ -265,5 +279,11 @@
 				
 				$("#title").val(title);
 			}
+			
+			<if condition="empty($info)">
+				$("#btn_submit").click(function(){
+					$("#formSubmit").submit();            
+				});
+			</if>
 		</script>
 <include file="Common/footer" />
