@@ -62,5 +62,9 @@ class PublicController extends Controller {
 			$this->redirect('Home/Public/index');
 		}
 	}*/
-
+	
+	public function getTime() {
+	    $json = array('code'=>0, 'error'=>'', 'data'=>time());
+	    $this->ajaxReturn($json, 'JSON');
+	}
 }

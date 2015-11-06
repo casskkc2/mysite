@@ -376,6 +376,21 @@ class IssueController extends GlobalController {
 		echo $this->generateDataForDataGrid($res['total'], $res['data']);
 	}
 	
+	public function getIssueById() {
+		$id = I('post.id', '');
+		$list = M('Issue')->alias('a')
+				->field('a.*, b.name as status_name')
+				->join('LEFT JOIN issue_status b ON a.status_id=b.status_id')
+				->where(array('a.id'=>$id))
+				->select();
+		if (empty($list)) {
+		    $issue = array('id'=>'');
+    	} else {
+    	    $issue = $list[0];
+    	}
+		$this->ajaxReturn($issue, 'JSON');
+	}
+	
 	public function doCheck() { // pass or nopass
 		$json = array(
 			'status' => true,
