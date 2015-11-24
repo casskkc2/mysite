@@ -382,6 +382,9 @@ class IssueController extends GlobalController {
 		$status = I('post.status', 0);
 		if(!empty($status)) {
 			$IssueEvent->statusToQueryCondition($status, $data);
+			if (in_array($status, array(21, 22))) {
+				$data['order'] = 'DESC';
+			}
 		}
 		
 		$res = $IssueEvent->getIssueList($data);

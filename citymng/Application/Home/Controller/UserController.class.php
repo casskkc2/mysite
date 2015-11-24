@@ -161,8 +161,8 @@ class UserController extends GlobalController {
 		$filter_date_end = I('get.filter_date_end', '');
 		
 		$cond = array();
-		!empty($filter_date_start) && $cond['a.create_time'] = array('egt', $filter_date_start);
-		!empty($filter_date_end) && $cond['a.create_time'] = array('elt', $filter_date_end . ' 23:59:59');
+		!empty($filter_date_start) && $cond['a.create_time'][] = array('egt', $filter_date_start);
+		!empty($filter_date_end) && $cond['a.create_time'][] = array('elt', $filter_date_end . ' 23:59:59');
 		$list = M('LoginHistory')->alias('a')
 			->join('user b ON a.user_id=b.id')
 			->field('a.*, b.username, b.department')
