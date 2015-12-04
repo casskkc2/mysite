@@ -3,12 +3,52 @@
 			<div class="content" style="width:715px">
 				<table class="form">
 					<tbody><tr>
-					  <td align="right">检查日期：
+					  <td align="left" style="padding-left:30px;">检查日期：
 						从<input type="text" size="16" id="filter_date_start" value="" name="filter_date_start" class="easyui-datebox"> 到 
-						<input type="text" size="16" id="filter_date_end" value="" name="filter_date_end" class="easyui-datebox"></td>
-					  <td align="right">
-					  关键字：<input type="text" id="keywords" placeholder="编号，区域，类别，备注" value="" /></td>
-					  <td>
+						<input type="text" size="16" id="filter_date_end" value="" name="filter_date_end" class="easyui-datebox">
+						<br />
+						<br />
+						检查时间：
+						从
+						<select id="filter_hour_start" name="filter_hour_start">
+							<option value=""></option>
+							<volist name="hourList" id="vo">
+							<option value="{$vo}">{$vo}</option>
+							</volist>
+						</select>时
+						<select id="filter_minute_start" name="filter_minute_start">
+							<option value=""></option>
+							<volist name="minuteList" id="vo">
+							<option value="{$vo}">{$vo}</option>
+							</volist>
+						</select>分 
+						到 
+						<select id="filter_hour_end" name="filter_hour_end">
+							<option value=""></option>
+							<volist name="hourList" id="vo">
+							<option value="{$vo}">{$vo}</option>
+							</volist>
+						</select>时
+						<select id="filter_minute_end" name="filter_minute_end">
+							<option value=""></option>
+							<volist name="minuteList" id="vo">
+							<option value="{$vo}">{$vo}</option>
+							</volist>
+						</select>分
+					  </td>
+					  <td align="right" valign="top">
+					  关键字：<input type="text" id="keywords" placeholder="编号，区域，类别，备注" value="" />
+					  <if condition="!empty($user_list)">
+					  <br /><br />
+					  用户名：<select id="user_id">
+							<option value=""></option>
+							<volist name="user_list" id="vo">
+							<option value="{$vo.id}">{$vo.username}</option>
+							</volist>
+					  </select>
+					  </if>
+					  </td>
+					  <td valign="top">
 					  <a id="btn_search" class="button">搜索</a> <a href="__CONTROLLER__/advancedSearch">高级查询</a>
 					  </td>
 					</tr>
@@ -129,10 +169,29 @@
 					var start_date = $("#filter_date_start").datebox("getValue");
 					var end_date = $("#filter_date_end").datebox("getValue");
 					var keywords = $("#keywords").val();
+					var filter_hour_start = $("#filter_hour_start").val();
+					var filter_minute_start = $("#filter_minute_start").val();
+					var filter_hour_end = $("#filter_hour_end").val();
+					var filter_minute_end = $("#filter_minute_end").val();
+				
 					var params = {status: status};
 					if (start_date != "") params.start_date = start_date;
 					if (end_date != "") params.end_date = end_date;
 					if (keywords != "") params.keywords = keywords;
+					if (filter_hour_start !== "") {
+						params.start_hour = filter_hour_start;
+						if (filter_minute_start !== "") params.start_minute = filter_minute_start;
+					}
+					if (filter_hour_end !== "") {
+						params.end_hour = filter_hour_end;
+						if (filter_minute_end !== "") params.end_minute = filter_minute_end;
+					}
+					
+					var user_id_elem = $("#user_id");
+					if (user_id_elem.length > 0) {
+						var user_id = user_id_elem.val();
+						if (user_id != "") params.user_id = user_id;
+					}
 					
 					$("#tb").datagrid("load", params);
 				});
@@ -204,10 +263,15 @@
 				
 				if (pos['lat'] && pos['lng']) {
 					var point = new BMap.Point(pos['lng'], pos['lat']);
-					map.centerAndZoom(point, 15);
-					var marker = new BMap.Marker(point);  // 创建标注
-					map.addOverlay(marker);               // 将标注添加到地图中
-					marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+                    var convertor = new BMap.Convertor();
+                    convertor.translate([point], 1, 5, function(data){
+                        if(data.status == 0) {
+        					map.centerAndZoom(data.points[0], 15);
+        					var marker = new BMap.Marker(data.points[0]);  // 创建标注
+        					map.addOverlay(marker);               // 将标注添加到地图中
+        					marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+        				}
+    				});
 				}else {
 					// 创建地址解析器实例
 					var myGeo = new BMap.Geocoder();
@@ -276,6 +340,29 @@
 				if (keywords) {
 					url += '/keywords/' + encodeURIComponent(keywords);
 				}
+				
+				var filter_hour_start = $("#filter_hour_start").val();
+				if (filter_hour_start !== "") {
+					url += '/filter_hour_start/' + encodeURIComponent(filter_hour_start);
+				}
+				var filter_minute_start = $("#filter_minute_start").val();
+				if (filter_minute_start !== "") {
+					url += '/filter_minute_start/' + encodeURIComponent(filter_minute_start);
+				}
+				var filter_hour_end = $("#filter_hour_end").val();
+				if (filter_hour_end !== "") {
+					url += '/filter_hour_end/' + encodeURIComponent(filter_hour_end);
+				}
+				var filter_minute_end = $("#filter_minute_end").val();
+				if (filter_minute_end !== "") {
+					url += '/filter_minute_end/' + encodeURIComponent(filter_minute_end);
+				}
+				
+				var user_id_elem = $("#user_id");
+					if (user_id_elem.length > 0) {
+						var user_id = user_id_elem.val();
+						if (user_id != "") url += '/user_id/' + encodeURIComponent(user_id);
+					}
 				
 				return url;
 			}

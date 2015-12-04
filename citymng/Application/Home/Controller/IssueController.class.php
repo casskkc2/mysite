@@ -30,6 +30,19 @@ class IssueController extends GlobalController {
 		$target_list = $TargetEvent->getTargetList($this->city['city_id'], 0, $this->all_target_arr);
 		$this->assign('target_list', $target_list);
 		
+		$this->assign('hourList', $IssueEvent->getHours());
+		$this->assign('minuteList', $IssueEvent->getMinutes());
+		
+		$user_list = array();
+		if ($this->user['user_type_id'] == 20) {
+			$cond = array(
+				'city_id' => $this->city['city_id'],
+				'user_type_id' => 21
+			);
+			$user_list = M('User')->where($cond)->order('id')->select();
+		}
+		$this->assign('user_list', $user_list);
+		
 		$this->assign('title', '问题管理');
 		$this->assign('status', $status_id);
 		$this->assign('self_url', U('Issue/index', '', ''));
@@ -349,7 +362,11 @@ class IssueController extends GlobalController {
 		$IssueEvent = A('Issue', 'Event');
 		$status_list = M('IssueStatus')->select();
 		foreach($status_list as $key=>$row) {
-				$status_list[$key]['name'] = $IssueEvent->getStatusName($row['status_id'], $this->user['user_type_id'], $row['name']);
+			if ($this->user['user_type_id'] >= 20 && in_array($row['status_id'], array(1, 2))) {
+				unset($status_list[$key]);
+				continue;
+			}
+			$status_list[$key]['name'] = $IssueEvent->getStatusName($row['status_id'], $this->user['user_type_id'], $row['name']);
 		}
 		$this->assign('status_list', $status_list);
 		
@@ -365,24 +382,57 @@ class IssueController extends GlobalController {
 		$data['order_by'] = I('post.order', 'ASC');
 		
 		$data['city_id'] = $this->city['city_id'];
+		
+		$user_id = I('post.user_id', 0);
+		$user_info = array();
+		if (!empty($user_id)) {
+			$user_info = M('User')->where(array('id'=>$user_id))->find();
+		}
 		//if ( !in_array($this->user['user_type_id'], array(10, 20)) ) {
+		if (empty($user_info)) {
 			$data['area'] = $this->user['area'];
 			$data['target'] = $this->user['target'];
+		}
 		//}
+		else {
+			// search by the specified user
+			$data['area'] = $user_info['area'];
+			$data['target'] = $user_info['target'];
+		}
 		
 		$keywords = I('post.keywords', '');
 		//$keywords = I('get.keywords', '');
 		$start_date = I('post.start_date', '');
 		$end_date = I('post.end_date', '');
+		
+		$start_hour = I('post.start_hour', '');
+		$start_minute = I('post.start_minute', '');
+		$end_hour = I('post.end_hour', '');
+		$end_minute = I('post.end_minute', '');
+		$start_time = '';
+		$end_time = '';
+		if ($start_hour !== '') {
+			$start_time .= $start_hour;
+			$start_time .= ':' . (($start_minute !== '') ? $start_minute : '00');
+			$start_time .= ':00';
+		}
+		if ($end_hour !== '') {
+			$end_time .= $end_hour;
+			$end_time .= ':' . (($end_minute !== '') ? $end_minute : '00');
+			$end_time .= ':00';
+		}
+		
 		!empty($keywords) && $data['keywords'] = $keywords;
 		!empty($start_date) && $data['exm_start_date'] = $start_date;
 		!empty($end_date) && $data['exm_end_date'] = $end_date;
+		!empty($start_time) && $data['exm_start_time'] = $start_time;
+		!empty($end_time) && $data['exm_end_time'] = $end_time;
 		
 		$IssueEvent = A('Issue', 'Event');
 		$status = I('post.status', 0);
 		if(!empty($status)) {
 			$IssueEvent->statusToQueryCondition($status, $data);
-			if (in_array($status, array(21, 22))) {
+			if (in_array($status, array(2, 21, 22))) {
 				$data['order'] = 'DESC';
 			}
 		}
@@ -572,17 +622,50 @@ class IssueController extends GlobalController {
 		$filter_date_end = I('get.filter_date_end', '');
 		$keywords = I('get.keywords', '');
 		
+		$start_hour = I('get.filter_hour_start', '');
+		$start_minute = I('get.filter_minute_start', '');
+		$end_hour = I('get.filter_hour_end', '');
+		$end_minute = I('get.filter_minute_end', '');
+		$start_time = '';
+		$end_time = '';
+		if ($start_hour !== '') {
+			$start_time .= $start_hour;
+			$start_time .= ':' . (($start_minute !== '') ? $start_minute : '00');
+			$start_time .= ':00';
+		}
+		if ($end_hour !== '') {
+			$end_time .= $end_hour;
+			$end_time .= ':' . (($end_minute !== '') ? $end_minute : '00');
+			$end_time .= ':00';
+		}
+		
 		$cond = array();
 		$cond['city_id'] = $this->city['city_id'];
 		
-		if ( !in_array($this->user['user_type_id'], array(10, 20)) ) {
+		/*if ( !in_array($this->user['user_type_id'], array(10, 20)) ) {
 			$cond['area'] = $this->user['area'];
 			$cond['target'] = $this->user['target'];
+		}*/
+		$user_id = I('get.user_id', 0);
+		$user_info = array();
+		if (!empty($user_id)) {
+			$user_info = M('User')->where(array('id'=>$user_id))->find();
+		}
+		if (empty($user_info)) {
+			$cond['area'] = $this->user['area'];
+			$cond['target'] = $this->user['target'];
+		}
+		else {
+			// search by the specified user
+			$cond['area'] = $user_info['area'];
+			$cond['target'] = $user_info['target'];
 		}
 		
 		!empty($keywords) && $cond['keywords'] = $keywords;
 		!empty($filter_date_start) && $cond['exm_start_date'] = $filter_date_start;
 		!empty($filter_date_end) && $cond['exm_end_date'] = $filter_date_end;
+		!empty($start_time) && $cond['exm_start_time'] = $start_time;
+		!empty($end_time) && $cond['exm_end_time'] = $end_time;
 		
 		$IssueEvent = A('Issue', 'Event');
 		if(!empty($status)) {
