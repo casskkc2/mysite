@@ -374,6 +374,51 @@ class IssueController extends GlobalController {
 		$this->display('Issue:search');
 	}
 	
+	public function advancedSearchExport() {
+		$mode = I('get.mode', 'default');
+		$data = array();
+		
+		$data['city_id'] = $this->city['city_id'];
+		$data['advance'] = true;
+		
+		$id = I('get.id', 0);
+		$status_id = I('get.status_id', 0);
+		$area_id = I('get.area_id', 0);
+		$target_id = I('get.target_id', 0);
+		$area_names = I('get.area_names', '');
+		$target_names = I('get.target_names', '');
+		$start_date = I('get.start_date', '');
+		$end_date = I('get.end_date', '');
+		!empty($id) && $data['id'] = $id;
+		!empty($status_id) && $data['status_id'] = $status_id;
+		!empty($start_date) && $data['exm_start_date'] = $start_date;
+		!empty($end_date) && $data['exm_end_date'] = $end_date;
+		
+		if (!empty($area_id)) {
+			$data['area_id'] = $area_id;
+		}else if (!empty($area_names)) {
+			$arr = explode(',', $area_names);
+			foreach($arr as $k=>$v) {
+				$data['area' . ($k+1)] = $v;
+			}
+		}
+		
+		if (!empty($target_id)) {
+			$data['target_id'] = $target_id;
+		}else if (!empty($target_names)) {
+			$arr = explode(',', $target_names);
+			foreach($arr as $k=>$v) {
+				$data['target' . ($k+1)] = $v;
+			}
+		}
+		//print_r($data);exit;
+		$IssueEvent = A('Issue', 'Event');
+		
+		$res = $IssueEvent->getIssueList($data);
+		
+		$this->exportFile($mode, $IssueEvent, $res['data']);
+	}
+	
 	public function jsondata() {
 		$data = array();
 		$data['page'] = I('post.page', 1);
@@ -504,7 +549,7 @@ class IssueController extends GlobalController {
 			if ($new_status_id > 0) {
 				$status = M('IssueStatus')->where(array('status_id'=>$new_status_id))->find();//dump($status);
 				if (!empty($status)) {
-					$status['name'] = $IssueEvent->getStatusName($status['status_id'], $this->user['user_type_id'], $status['name']);
+					$status['name'] = $IssueEvent->getStatusName($status['status_id'], $this->user['user_type_id'], $status['name'], $operation_id);
 					$reply_text = '[' . $status['name'] . ']' . $reply_text;
 				}
 			}
@@ -674,7 +719,11 @@ class IssueController extends GlobalController {
 		
 		$res = $IssueEvent->getIssueList($cond);
 		$data = $res['data'];
-		
+		//print_r($data);exit;
+		$this->exportFile($mode, $IssueEvent, $data);
+	}
+	
+	private function exportFile($mode, $IssueEvent, $data) {
 		$cols = array(
 			'编号',
 			'日期', '时间',

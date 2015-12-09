@@ -58,7 +58,7 @@ table.form2 > tbody > tr > td:first-child {
 						<td></td>
 						<td>
 						<a id="btn_search" class="button">搜索</a> 
-						<a class="searchExpand" onclick="$('#searchBody').hide();$('#expandBody').show();"><b class="arrow arrow_up"></b>收起</a>
+						<a class="searchExpand" onclick="toggleSearchForm('collaspe');"><b class="arrow arrow_up"></b>收起</a>
 						</td>
 					</tr>
 				  </tbody>
@@ -66,7 +66,7 @@ table.form2 > tbody > tr > td:first-child {
 					<tr>
 						<td></td>
 						<td>
-							<a class="searchExpand" onclick="$('#searchBody').show();$('#expandBody').hide();"><b class="arrow arrow_down"></b>展开</a>
+							<a class="searchExpand" onclick="toggleSearchForm('expand');"><b class="arrow arrow_down"></b>展开</a>
 						</td>
 					</tr>
 				  </tbody>
@@ -75,6 +75,18 @@ table.form2 > tbody > tr > td:first-child {
 				<table id="tb" style="width:710px;">
 				</table>
 				
+				<table id="exportForm" class="form" style="display:none; margin:15px 0 10px;">
+					<tbody>
+					<tr>
+						<td></td>
+						<td align="right">
+							<a class="button" onclick="doExport('default');">导出问题</a> 
+							<a class="button" onclick="doExport('with_img');">带图片导出</a> 
+							<a class="button" onclick="doExport('only_img');">导出图片</a> 
+						</td>
+					</tr>
+				  </tbody>
+				 </table>
 			</div>
 			
 			<div class="content" style="width:281px;margin-left:4px;padding:0;height:545px;">
@@ -97,6 +109,85 @@ table.form2 > tbody > tr > td:first-child {
 		<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=33FqAaSCIdSeYDQOVXYoV4f5"></script>
 		<script type="text/javascript">	
 			var grid_shown = false;
+			
+			function toggleSearchForm(mode) {
+				var o_h = 0;
+				if (mode == 'collaspe') {
+					o_h = 146;
+					$('#searchBody').hide();$('#expandBody').show();
+				}else if(mode == 'expand') {
+					o_h = 346;
+					$('#searchBody').show();$('#expandBody').hide();
+				}
+				if (grid_shown) {
+					var h = $("#tb").datagrid("getPanel").height();
+					h += o_h;
+					$("#aa").parent().height(h);
+					$("#aa").height(h-2).accordion("resize");
+				}
+			}
+			
+			function getParams() {
+				var start_date = $("#filter_date_start").datebox("getValue");
+				var end_date = $("#filter_date_end").datebox("getValue");
+				var issue_id = $("#issue_id").val();
+				var status_id = $("#status_id").val();
+				
+				var params = {length:0};
+				if (start_date != "") {
+					params.start_date = start_date;
+					params.length += 1;
+				}
+				if (end_date != "") {
+					params.end_date = end_date;
+					params.length += 1;
+				}
+				if (issue_id != "") {
+					params.id = issue_id;
+					params.length += 1;
+				}
+				if (status_id != 0) {
+					params.status_id = status_id;
+					params.length += 1;
+				}
+				
+				var obj = $("[name=area_id]").eq(0);
+				var area_id = obj.val();
+				if (area_id == 0) {
+					var area_names = $("input[name='area_name[]']").map(function() {
+						if($(this).val() != '') 
+							return $(this).val();
+					}).get();
+					//alert(area_names);
+					if (area_names.length > 0) {
+						params.area_names = area_names.join();
+						params.length += 1;
+					}
+				}else {
+					params.area_id = area_id;
+					params.length += 1;
+				}
+				
+				var obj = $("[name=target_id]").eq(0);
+				var target_id = obj.val();
+				if (target_id == 0) {
+					var target_names = $("input[name='target_name[]']").map(function() {
+						if($(this).val() != '') 
+							return $(this).val();
+					}).get();
+					//alert(target_names);
+					if (target_names.length > 0) {
+						params.target_names = target_names.join();
+						params.length += 1;
+					}
+				}else {
+					params.target_id = target_id;
+					params.length += 1;
+				}
+				
+				return params;
+			}
+			
 			$(function() {
 				$("#aa").accordion({
 					onSelect: function(title, index) {
@@ -107,63 +198,7 @@ table.form2 > tbody > tr > td:first-child {
 				});
 				
 				$("#btn_search").click(function() {
-					var start_date = $("#filter_date_start").datebox("getValue");
-					var end_date = $("#filter_date_end").datebox("getValue");
-					var issue_id = $("#issue_id").val();
-					var status_id = $("#status_id").val();
-					
-					var params = {length:0};
-					if (start_date != "") {
-						params.start_date = start_date;
-						params.length += 1;
-					}
-					if (end_date != "") {
-						params.end_date = end_date;
-						params.length += 1;
-					}
-					if (issue_id != "") {
-						params.id = issue_id;
-						params.length += 1;
-					}
-					if (status_id != 0) {
-						params.status_id = status_id;
-						params.length += 1;
-					}
-					
-					var obj = $("[name=area_id]").eq(0);
-					var area_id = obj.val();
-					if (area_id == 0) {
-						var area_names = $("input[name='area_name[]']").map(function() {
-							if($(this).val() != '') 
-								return $(this).val();
-						}).get();
-						//alert(area_names);
-						if (area_names.length > 0) {
-							params.area_names = area_names.join();
-							params.length += 1;
-						}
-					}else {
-						params.area_id = area_id;
-						params.length += 1;
-					}
-					
-					var obj = $("[name=target_id]").eq(0);
-					var target_id = obj.val();
-					if (target_id == 0) {
-						var target_names = $("input[name='target_name[]']").map(function() {
-							if($(this).val() != '') 
-								return $(this).val();
-						}).get();
-						//alert(target_names);
-						if (target_names.length > 0) {
-							params.target_names = target_names.join();
-							params.length += 1;
-						}
-					}else {
-						params.target_id = target_id;
-						params.length += 1;
-					}
-					
+					var params = getParams();
 					
 					var str = '';
 					for(var k in params) {
@@ -179,6 +214,7 @@ table.form2 > tbody > tr > td:first-child {
 					if (!grid_shown) {
 						loadGrid(params);
 						grid_shown = true;
+						$("#exportForm").show();
 					}else {
 						$("#tb").datagrid("load", params);
 					}
@@ -280,6 +316,12 @@ table.form2 > tbody > tr > td:first-child {
 						{field:'time',title:'检查时间',width:80},
 						{field:'weight',title:'计数',width:80}
 					]],
+					onLoadSuccess: function(data) {
+						var h = $("#tb").datagrid("getPanel").height();
+						h += 346;
+						$("#aa").parent().height(h);
+						$("#aa").height(h-2).accordion("resize");
+					},
 					onLoadError: function(data) {
 						alert(data.responseText);
 					},
@@ -287,6 +329,31 @@ table.form2 > tbody > tr > td:first-child {
 						detail(row.id);
 					}
 				});
+			}
+			
+			function getExportFilter() {
+				var url = "";
+				var params = getParams();
+				if (params.length == 0) return false;
+				
+				delete params["length"];
+				for(var k in params) {
+					url += "/" + k + "/" + encodeURIComponent(params[k]);
+				}
+				return url;
+			}
+			
+			function doExport(mode) {
+				url = ROOT + '/Issue/advancedSearchExport/mode/' + mode;
+				
+				var queryString = getExportFilter();
+				if (!queryString){
+					alert('请选择查询条件');
+					return false;
+				}
+				
+				url += queryString;
+				window.open(url);
 			}
 			
 			function detail(id) {

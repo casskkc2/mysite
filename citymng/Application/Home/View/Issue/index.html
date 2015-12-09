@@ -119,7 +119,7 @@
 				 </table>
 			</div>
 			
-			<div class="content" style="width:281px;margin-left:4px;padding:0;height:545px;">
+			<div class="content" style="width:281px;margin-left:4px;padding:0;height:589px;">
 			    <div id="aa" class="easyui-accordion" fit="true">
 					<div id="issue_detail" title="问题详情" data-options="selected:true" style="overflow:auto;padding:10px;">
 						
@@ -230,6 +230,14 @@
 					{field:'time',title:'检查时间',width:80},
 					{field:'weight',title:'计数',width:80}
 				]],
+				onLoadSuccess: function(data) {
+					var obj = $("#tb").datagrid("getPanel").parent().parent();
+					var h = obj.height() + 20;
+					//h += 189;
+					//alert(h);
+					$("#aa").parent().height(h);
+					$("#aa").height(h-2).accordion("resize");
+				},
 				onLoadError: function(data) {
 					alert(data.responseText);
 				},
@@ -324,7 +332,9 @@
 			}
 			
 			function getExportFilter() {
-				var url = '/status/' + status;
+				var url = "";
+				if (status !== "")
+				url += '/status/' + status;
 	
 				var filter_date_start = $("#filter_date_start").datebox("getValue");
 				if (filter_date_start) {
