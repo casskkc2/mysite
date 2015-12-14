@@ -45,3 +45,5 @@ CREATE TABLE `faq` (
 ALTER TABLE `bulletin` ADD COLUMN `city_id` VARCHAR(6) NOT NULL DEFAULT 0 COMMENT '城市id';
 
 ALTER TABLE `setting` ADD COLUMN `city_id` VARCHAR(6) NOT NULL DEFAULT 0 COMMENT '城市id';
+
+ALTER TABLE issue ADD COLUMN end_date_bak DATE AFTER end_date;
