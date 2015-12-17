@@ -60,7 +60,8 @@
 			<td>状态</td>
 			<td>{$info.status_name}</td>
 		</tr>
-		<if condition="in_array($info['status_id'], array(3,12))">
+		
+		<if condition="!empty($info['end_date'])">
 		<tr>
 			<td>过期时间</td>
 			<td>{$info.end_date}</td>
