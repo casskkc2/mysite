@@ -23,7 +23,7 @@ class AccountController extends GlobalController {
 			}
 			$this->user['password'] = $data['password'];
 			session('user', $this->user);
-			$this->success('密码修改成功', U('Home/Account/pwd'), 3);
+			$this->success('密码修改成功', U('Home/Issue/index'), 3);
 		}
 		$this->assign('title', '修改密码');
 		$this->display();

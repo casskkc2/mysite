@@ -321,10 +321,30 @@ class IssueController extends GlobalController {
 			$target_names = I('post.target_names', '');
 			$start_date = I('post.start_date', '');
 			$end_date = I('post.end_date', '');
+			
+			$start_hour = I('post.start_hour', '');
+			$start_minute = I('post.start_minute', '');
+			$end_hour = I('post.end_hour', '');
+			$end_minute = I('post.end_minute', '');
+			$start_time = '';
+			$end_time = '';
+			if ($start_hour !== '') {
+				$start_time .= $start_hour;
+				$start_time .= ':' . (($start_minute !== '') ? $start_minute : '00');
+				$start_time .= ':00';
+			}
+			if ($end_hour !== '') {
+				$end_time .= $end_hour;
+				$end_time .= ':' . (($end_minute !== '') ? $end_minute : '00');
+				$end_time .= ':00';
+			}
+		
 			!empty($id) && $data['id'] = $id;
 			!empty($status_id) && $data['status_id'] = $status_id;
 			!empty($start_date) && $data['exm_start_date'] = $start_date;
 			!empty($end_date) && $data['exm_end_date'] = $end_date;
+			!empty($start_time) && $data['exm_start_time'] = $start_time;
+			!empty($end_time) && $data['exm_end_time'] = $end_time;
 			
 			if (!empty($area_id)) {
 				$data['area_id'] = $area_id;
@@ -370,11 +390,16 @@ class IssueController extends GlobalController {
 		}
 		$this->assign('status_list', $status_list);
 		
+		$this->assign('hourList', $IssueEvent->getHours());
+		$this->assign('minuteList', $IssueEvent->getMinutes());
+		
 		$this->assign('title', '高级搜索');
 		$this->display('Issue:search');
 	}
 	
 	public function advancedSearchExport() {
+		set_time_limit(0);
+		
 		$mode = I('get.mode', 'default');
 		$data = array();
 		
@@ -389,10 +414,30 @@ class IssueController extends GlobalController {
 		$target_names = I('get.target_names', '');
 		$start_date = I('get.start_date', '');
 		$end_date = I('get.end_date', '');
+		
+		$start_hour = I('post.start_hour', '');
+		$start_minute = I('post.start_minute', '');
+		$end_hour = I('post.end_hour', '');
+		$end_minute = I('post.end_minute', '');
+		$start_time = '';
+		$end_time = '';
+		if ($start_hour !== '') {
+			$start_time .= $start_hour;
+			$start_time .= ':' . (($start_minute !== '') ? $start_minute : '00');
+			$start_time .= ':00';
+		}
+		if ($end_hour !== '') {
+			$end_time .= $end_hour;
+			$end_time .= ':' . (($end_minute !== '') ? $end_minute : '00');
+			$end_time .= ':00';
+		}
+			
 		!empty($id) && $data['id'] = $id;
 		!empty($status_id) && $data['status_id'] = $status_id;
 		!empty($start_date) && $data['exm_start_date'] = $start_date;
 		!empty($end_date) && $data['exm_end_date'] = $end_date;
+		!empty($start_time) && $data['exm_start_time'] = $start_time;
+		!empty($end_time) && $data['exm_end_time'] = $end_time;
 		
 		if (!empty($area_id)) {
 			$data['area_id'] = $area_id;
@@ -416,7 +461,172 @@ class IssueController extends GlobalController {
 		
 		$res = $IssueEvent->getIssueList($data);
 		
-		$this->exportFile($mode, $IssueEvent, $res['data']);
+		if ($mode == 'scale_summary') {
+			$this->scaleSummaryExport($res['data'], array(
+				'area_id' => $area_id,
+				'area_names' => $area_names,
+				'target_id' => $target_id,
+				'target_names' => $target_names
+			));
+		}else {
+			$this->exportFile($mode, $IssueEvent, $res['data']);
+		}
+	}
+	
+	private function scaleSummaryExport($rows, $params) {
+		set_time_limit(0);
+		
+		$area_id = $params['area_id'];
+		$target_id = $params['target_id'];
+		$target_names = $params['target_names'];
+		
+		$title = '';
+		if (!empty($area_id)) {
+			$AreaEvent = A('Area', 'Event');
+			$area_info = $AreaEvent->getAreaById($area_id);
+			$parents = $AreaEvent->getParentsById($area_id);
+			foreach($parents as $info) {
+				$title .= $info['name'];
+			}
+			$title .= $area_info['name'] . '问题分布';
+		}
+		//exit($title);
+		
+		$TargetEvent = A('Target', 'Event');
+		$root_target_ids = array();
+		$filter_target_ids = array();
+		if (!empty($target_id)) {
+			$parents = $TargetEvent->getParentsById($target_id);
+			$root_target_ids[] = $parents[0]['id'];
+			$filter_target_ids[] = $parents[0]['id'];
+			foreach($parents as $k=>$info) {
+				if ($k > 0) {
+					$filter_target_ids[] = $info['id'];
+				}
+			}
+			$filter_target_ids[] = $target_id;
+		}else if (!empty($target_names)) {
+			$arr = explode(',', $target_names);
+			if (!empty($arr[0])) {
+				$info = $TargetEvent->getTargetByName($this->city['city_id'], $arr[0]);
+				if ($info) {
+					$root_target_ids[] = $info['id'];
+					if (!empty($arr[1])) { // 二级指标
+						$filter_target_ids[] = $info['id'];
+						$info2 = $TargetEvent->getTargetByName($this->city['city_id'], $arr[1], $info['path'] . $info['id'] . ',');
+						if ($info2) {
+							$filter_target_ids[] = $info2['id'];
+							$children = $TargetEvent->getTargetList($this->city['city_id'], $info2['id']);
+							foreach($children as $child) {
+								$filter_target_ids[] = $child['id'];
+							}
+						}
+					}
+				}
+			}
+		}else {
+			$list = $TargetEvent->getTargetList($this->city['city_id'], 0);
+			foreach($list as $value) {
+				$root_target_ids[] = $value['id'];
+			}
+		}
+		//print_r($root_target_ids);
+		//print_r($filter_target_ids);
+		//exit;
+		$target_list = $TargetEvent->getTargetAndChildrenByIds($this->city['city_id'], $root_target_ids, $filter_target_ids);
+		//print_r($target_list);exit;
+		$target_data = buildTree($target_list, ',0,', array('code'));
+		//var_export($target_data);exit;
+		
+		$data = array();
+		$total = 0;
+		foreach($rows as $row) {
+			$total += $row['weight'];
+		}
+		foreach($rows as $row) {
+			if (isset($data[$row['target_id']])) {
+				$data[$row['target_id']]['count'] += $row['weight'];
+			}else {
+				$data[$row['target_id']] = array(
+					'count' => $row['weight'],
+					'imgs' => C('HTTP_SERVER') . $row['img'],
+					'target_code' => $row['target_code']
+				);
+			}
+		}
+		foreach($data as $key=>$value) {
+			$data[$key]['scale'] = round( ($value['count'] / $total) * 100, 2) . '%';
+		}
+		//print_r($data);exit;
+		
+		$target_max = getMaxDimensionOfTreeData($target_data);
+		//echo $target_max;exit;
+		$total_sum = 0;
+		foreach($target_data as $key=>$value) {
+			if (!empty($value['children'])) {
+				if ($target_max ==2) { // 共两级
+					$id = 'smry_' . $value['id'];
+					$target_data[$key]['children'][] = array(
+						'id' => $id,
+						'is_smry' => true,
+						'text' => '合计'
+					);
+					$sum = 0;
+					foreach($value['children'] as $child) {
+						if (isset($data[$child['id']])) {
+							$sum += $data[$child['id']]['count'];
+							$total_sum += $data[$child['id']]['count'];
+						}
+					}
+					$data[$id] = array(
+						'count' => $sum,
+						'imgs' => '',
+						'scale' => $total == 0 ? '0%' : round($sum / $total * 100, 2) . '%'
+					);
+				}else if ($target_max ==3){ // 共三级
+					foreach($value['children'] as $k=>$v) {
+						if (!empty($v['children'])) {
+							$id = 'smry_' . $v['id'];
+							$target_data[$key]['children'][$k]['children'][] = array(
+								'id' => $id,
+								'is_smry' => true,
+								'text' => '合计'
+							);
+							$sum = 0;
+							foreach($v['children'] as $child) {
+								if (isset($data[$child['id']])) {
+									$sum += $data[$child['id']]['count'];
+									$total_sum += $data[$child['id']]['count'];
+								}
+							}
+							$data[$id] = array(
+								'count'=> $sum,
+								'imgs' => '',
+								'scale' => $total == 0 ? '0%' : round($sum / $total * 100, 2) . '%'
+							);
+						}
+					}
+				}
+			}
+		}
+		$target_data[] = array(
+			'id'	=> 'smry_total',
+			'is_total'	=> true,
+			'text'	=> '总计'
+		);
+		$data['smry_total'] = array(
+			'count'=>$total_sum,
+			'imgs' => '',
+			'scale' => ''
+		);
+		//print_r($data);exit;
+		getSummaryColsFromTreeData($target_data);
+		//var_export($target_data);exit;
+		$target_max = getMaxDimensionOfTreeData($target_data);
+		//echo $target_max;exit;
+		
+		$ExcelEvent = A('Excel', 'Event');
+		$ExcelEvent->exportScaleSummary($target_data, $target_max, $data, $title);
 	}
 	
 	public function jsondata() {
@@ -661,6 +871,8 @@ class IssueController extends GlobalController {
 	}
 	
 	public function export() {
+		set_time_limit(0);
+		
 		$mode = I('get.mode', 'default');
 		$status = I('get.status', 0);
 		$filter_date_start = I('get.filter_date_start', '');
@@ -833,6 +1045,8 @@ class IssueController extends GlobalController {
 	}
 	
 	public function exportSummary() {
+		set_time_limit(0);
+		
 		$root_area_ids = I('get.area', '');
 		$start_date = I('get.filter_date_start', '');
 		$end_date = I('get.filter_date_end', '');

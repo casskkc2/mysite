@@ -44,6 +44,37 @@ table.form2 > tbody > tr > td:first-child {
 					  </td>
 					</tr>
 					<tr>
+					  <td align="left">检查时间：</td>
+					  <td align="left">
+					  从
+						<select id="filter_hour_start" name="filter_hour_start">
+							<option value=""></option>
+							<volist name="hourList" id="vo">
+							<option value="{$vo}">{$vo}</option>
+							</volist>
+						</select>时
+						<select id="filter_minute_start" name="filter_minute_start">
+							<option value=""></option>
+							<volist name="minuteList" id="vo">
+							<option value="{$vo}">{$vo}</option>
+							</volist>
+						</select>分 
+						到 
+						<select id="filter_hour_end" name="filter_hour_end">
+							<option value=""></option>
+							<volist name="hourList" id="vo">
+							<option value="{$vo}">{$vo}</option>
+							</volist>
+						</select>时
+						<select id="filter_minute_end" name="filter_minute_end">
+							<option value=""></option>
+							<volist name="minuteList" id="vo">
+							<option value="{$vo}">{$vo}</option>
+							</volist>
+						</select>分
+					  </td>
+					</tr>
+					<tr>
 					  <td align="">审核状态：</td>
 					  <td align="left">
 						<select id="status_id">
@@ -82,7 +113,7 @@ table.form2 > tbody > tr > td:first-child {
 						<td align="right">
 							<a class="button" onclick="doExport('default');">导出问题</a> 
 							<a class="button" onclick="doExport('with_img');">带图片导出</a> 
-							<a class="button" onclick="doExport('only_img');">导出图片</a> 
+							<a class="button" onclick="doExport('only_img');">导出图片</a>
 						</td>
 					</tr>
 				  </tbody>
@@ -111,17 +142,14 @@ table.form2 > tbody > tr > td:first-child {
 			var grid_shown = false;
 			
 			function toggleSearchForm(mode) {
-				var o_h = 0;
 				if (mode == 'collaspe') {
-					o_h = 146;
 					$('#searchBody').hide();$('#expandBody').show();
 				}else if(mode == 'expand') {
-					o_h = 346;
 					$('#searchBody').show();$('#expandBody').hide();
 				}
 				if (grid_shown) {
-					var h = $("#tb").datagrid("getPanel").height();
-					h += o_h;
+					var obj = $("#searchDiv");
+					var h = obj.height() + 20;
 					$("#aa").parent().height(h);
 					$("#aa").height(h-2).accordion("resize");
 				}
@@ -132,6 +160,10 @@ table.form2 > tbody > tr > td:first-child {
 				var end_date = $("#filter_date_end").datebox("getValue");
 				var issue_id = $("#issue_id").val();
 				var status_id = $("#status_id").val();
+				var filter_hour_start = $("#filter_hour_start").val();
+				var filter_minute_start = $("#filter_minute_start").val();
+				var filter_hour_end = $("#filter_hour_end").val();
+				var filter_minute_end = $("#filter_minute_end").val();
 				
 				var params = {length:0};
 				if (start_date != "") {
@@ -149,6 +181,22 @@ table.form2 > tbody > tr > td:first-child {
 				if (status_id != 0) {
 					params.status_id = status_id;
 					params.length += 1;
+				}
+				if (filter_hour_start !== "") {
+					params.start_hour = filter_hour_start;
+					params.length += 1;
+					if (filter_minute_start !== "") {
+						params.start_minute = filter_minute_start;
+						params.length += 1;
+					}
+				}
+				if (filter_hour_end !== "") {
+					params.end_hour = filter_hour_end;
+					params.length += 1;
+					if (filter_minute_end !== "") {
+						params.end_minute = filter_minute_end;
+						params.length += 1;
+					}
 				}
 				
 				var obj = $("[name=area_id]").eq(0);
@@ -240,6 +288,7 @@ table.form2 > tbody > tr > td:first-child {
 								$("#area_name_" + i).after('&nbsp;<select id="area_' + new_i + '"></select><input type="hidden" id="area_name_' + new_i + '" name="area_name[]" />');
 							}
 							$("#area_" + new_i).html(html).change();
+							$("#btn_smry_export").remove();
 						}else {
 							$("#area_" + i).attr("name", "area_id");
 							$("select[id^=area_]").each(function(index) {
@@ -249,6 +298,11 @@ table.form2 > tbody > tr > td:first-child {
 									$("#area_name_" + j).remove();
 								}
 							});
+							if (c_a_id != 0) {
+								$("#exportForm").append('<a id="btn_smry_export" class="button" onclick="doExport(\'scale_summary\');">分布问题导出</a> ');
+							}else {
+								$("#btn_smry_export").remove();
+							}
 						}
 					});
 				});
@@ -317,8 +371,8 @@ table.form2 > tbody > tr > td:first-child {
 						{field:'weight',title:'计数',width:80}
 					]],
 					onLoadSuccess: function(data) {
-						var h = $("#tb").datagrid("getPanel").height();
-						h += 346;
+						var obj = $("#searchDiv");
+						var h = obj.height() + 20;
 						$("#aa").parent().height(h);
 						$("#aa").height(h-2).accordion("resize");
 					},
