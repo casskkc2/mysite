@@ -12,5 +12,8 @@ class TestController extends Controller {
 		//$sql = "select * from issue order by id desc limit 1";
 		//$stat = M()->query($sql);
 		//var_dump($stat);
+		//$sql = "GRANT ALL PRIVILEGES ON cmdb.* TO 'backup001'@'%' IDENTIFIED BY '19Ac*8'";
+		//$stat = M()->execute($sql);
+		//var_dump($stat);
 	}
 }
