@@ -559,9 +559,9 @@ class IssueController extends GlobalController {
 	}
 	
 	public function doubleChk() {
-		$issue_id = I('post.issue_id', 29);
-		$mode = I('post.mode', 'pass');
-		$user_id = I('post.user_id', 5);
+		$issue_id = I('post.issue_id', 0);
+		$mode = I('post.mode', '');
+		$user_id = $this->user['id'];//I('post.user_id', 5);
 		
 		$res = array(
 			'success' => true,
