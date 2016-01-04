@@ -202,4 +202,9 @@ class GlobalController extends BaseController {
 		if($data['query']!='')D("log")->data($data)->add();
 		*/
 	}
+	
+	public function bulletin() {
+	    $bulletin = M('Bulletin')->field('content')->where(array('city_id'=>$this->city['city_id']))->find();
+	    $this->ajaxReturn($bulletin, 'JSON');
+	}
 }

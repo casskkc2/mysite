@@ -49,6 +49,8 @@ class IssueController extends GlobalController {
 				'weight' => I('post.weight'),
 				'title' => '',//I('post.title'),
 				'checker' => I('post.checker'),
+				'lng' => I('post.lng'),
+				'lat' => I('post.lat'),
 				'des' => I('post.des'),
 				'user_id' => $this->user['id'],
 				'status_id' => 1,
@@ -503,6 +505,19 @@ class IssueController extends GlobalController {
 		$html .= '</script>';
 		echo $html;
 		exit;
+	}
+	
+	public function getReply() {
+		$id = I('post.id', '0');
+	
+    	$info = M('IssueReply')->alias('a')
+        		->field('a.*, b.username AS username')
+        		->join('user b ON a.user_id=b.id')
+        		->where(array('a.issue_id'=>$id))
+        		->order('create_time DESC')
+        		->select();
+		
+	    $this->ajaxReturn($info, 'JSON');
 	}
 	
 	public function detail() {

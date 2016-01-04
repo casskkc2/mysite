@@ -32,8 +32,37 @@ class PublicController extends Controller {
 			$json['data'] = array();
 			$json['data']['user'] = $user;
 			$json['data']['city'] = $city;
-			$json['data']['area'] = M('Area')->field('id, name, path')->where(array('status'=>0, 'city_id'=>$user['city_id']))->order('sort')->select();
-			$json['data']['target'] = M('Target')->field('id, name, path')->where(array('status'=>0, 'city_id'=>$user['city_id']))->order('sort')->select();
+			
+			$area_arr = explode(',', $user['area']);
+			$AreaEvent = A('Home/Area', 'Event');
+		    $areaList = $AreaEvent->getAreaListByIds($user['city_id'], $area_arr);
+		    $all_area_arr = $area_arr;
+		    foreach($areaList as $row) {
+			    $all_area_arr = array_merge($all_area_arr, treePathToArray($row['path']));
+    		}
+    		$all_area_arr = array_unique($all_area_arr);
+    		
+			$cond = array('status'=>0, 'city_id'=>$user['city_id']);
+        	if (!empty($all_area_arr) && !empty($all_area_arr[0])) {
+        		$cond['id'] = array('in', $all_area_arr);
+        	}
+			
+		    $target_arr = explode(',', $user['target']);
+    		$TargetEvent = A('Home/Target', 'Event');
+    		$targetList = $TargetEvent->getTargetsByIds($target_arr);
+    		$all_target_arr = $target_arr;
+    		foreach($targetList as $row) {
+    			$all_target_arr = array_merge($all_target_arr, treePathToArray($row['path']));
+    		}
+    		$all_target_arr = array_unique($all_target_arr);
+    		
+			$cond_target = array('status'=>0, 'city_id'=>$user['city_id']);
+        	if (!empty($all_target_arr) && !empty($all_target_arr[0])) {
+        		$cond_target['id'] = array('in', $all_target_arr);
+        	}
+        	
+			$json['data']['area'] = M('Area')->field('id, name, path')->where($cond)->order('sort')->select();
+			$json['data']['target'] = M('Target')->field('id, name, path, code, sort')->where($cond_target)->order('sort')->select();
 			
 			$data = array(
 				'last_login_ip' => $_SERVER['REMOTE_ADDR'],
@@ -50,7 +79,6 @@ class PublicController extends Controller {
 			);
 			M('LoginHistory')->data($data)->add();
 
-			//exit(json_encode($json));
 			$this->ajaxReturn($json, 'JSON');
 		}
 	}
@@ -65,6 +93,11 @@ class PublicController extends Controller {
 	
 	public function getTime() {
 	    $json = array('code'=>0, 'error'=>'', 'data'=>time());
+	    $this->ajaxReturn($json, 'JSON');
+	}
+	
+	public function getApkInfo() {
+	    $json = array('versionCode'=>7, 'versionName'=>'1.1.1', 'versionUrl'=>'http://59.172.252.38:8081/download/app/citymng.apk');
 	    $this->ajaxReturn($json, 'JSON');
 	}
 }
