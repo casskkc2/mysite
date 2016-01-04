@@ -520,6 +520,110 @@ class IssueController extends GlobalController {
 	    $this->ajaxReturn($info, 'JSON');
 	}
 	
+	public function uploadGps() {
+		$username = I('post.username', '');
+		$lat = I('post.lat', '');
+		$lng = I('post.lng', '');
+		
+		$res = array(
+			'success' => true,
+			'error' => ''
+		);
+		if (empty($username)) {
+			$res['success'] = false;
+			$res['error'] = 'Username is invalid.';
+			$this->ajaxReturn($res, 'JSON');
+		}
+		
+		$user = M('User')->where(array('username'=>$username))->find();
+		if (empty($user)) {
+			$res['success'] = false;
+			$res['error'] = 'Username is invalid.';
+			$this->ajaxReturn($res, 'JSON');
+		}
+		
+		$data = array(
+			'user_id' => $user['id'],
+			'lat' => $lat,
+			'lng' => $lng,
+			'create_time' => date('Y-m-d H:i:s')
+		);
+		$stat = M('UserGps')->data($data)->add();
+		if ($stat == 0) {
+			$res['success'] = false;
+			$res['error'] = 'Save gps to database failed.';
+			$this->ajaxReturn($res, 'JSON');
+		}
+		
+		$this->ajaxReturn($res, 'JSON');
+	}
+	
+	public function doubleChk() {
+		$issue_id = I('post.issue_id', 29);
+		$mode = I('post.mode', 'pass');
+		$user_id = I('post.user_id', 5);
+		
+		$res = array(
+			'success' => true,
+			'error' => ''
+		);
+		if (empty($issue_id) || !in_array($mode, array('pass', 'nopass'))) {
+			$res['success'] = false;
+			$res['error'] = 'Parameters are invalid.';
+			$this->ajaxReturn($res, 'JSON');
+		}
+		
+		$issue = M('Issue')->where(array('id'=>$issue_id))->find();
+		if (empty($issue)) {
+			$res['success'] = false;
+			$res['error'] = 'Parameters are invalid.';
+			$this->ajaxReturn($res, 'JSON');
+		}
+		if ($issue['status_id'] != 4) {
+			$res['success'] = false;
+			$res['error'] = 'This issue should not be double check.';
+			$this->ajaxReturn($res, 'JSON');
+		}
+		
+		$data = array();
+		$reply_text = '';
+		if (strcmp($mode, 'pass') == 0) {
+			$data['db_chk_rs'] = 1;
+			$data['last_mod_user2_id'] = $user_id;
+			$reply_text .= '[复查通过]';
+		}else if (strcmp($mode, 'nopass') == 0) {
+			$data['db_chk_rs'] = 0;
+			$data['status_id'] = 3;
+			$data['is_vp'] = 1;
+			$data['last_mod_user2_id'] = $user_id;
+			$reply_text .= '[复查不通过]状态->待处理';
+		}
+		if (!empty($data)) {
+			$stat = M('Issue')->where(array('id'=>$issue_id))->data($data)->save();
+			if (false === $stat) {
+				$res['success'] = false;
+				$res['error'] = 'Update issue failed.';
+				$this->ajaxReturn($res, 'JSON');
+			}
+		}
+		if (!empty($reply_text)) {
+			$reply_data = array(
+				'issue_id'	=> $issue_id,
+				'type'		=> 4,
+				'text'		=> $reply_text,
+				'user_id'	=> $user_id,
+				'create_time'	=> date('Y-m-d H:i:s')
+			);
+			$stat = M('IssueReply')->data($reply_data)->add();
+			if (false === $stat) {
+				$res['success'] = false;
+				$res['error'] = 'Save to issue_reply failed.';
+				$this->ajaxReturn($res, 'JSON');
+			}
+		}
+		$this->ajaxReturn($res, 'JSON');
+	}
+	
 	public function detail() {
 		$id = I('post.id');
 		$from = I('post.from', '');

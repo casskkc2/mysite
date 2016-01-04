@@ -201,6 +201,8 @@ class UserController extends GlobalController {
 			->select();
 		foreach($list as $row) {
 			if (!empty($row['lat']) && !empty($row['lng'])) {
+				$row['lat'] = trim($row['lat'], '0');
+				$row['lng'] = trim($row['lng'], '0');
 				$res[] = $row;
 			}
 		}

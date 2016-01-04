@@ -659,6 +659,8 @@ class IssueController extends GlobalController {
 		//$keywords = I('get.keywords', '');
 		$start_date = I('post.start_date', '');
 		$end_date = I('post.end_date', '');
+		$lat = I('post.lat', '');
+		$lng = I('post.lng', '');
 		
 		$start_hour = I('post.start_hour', '');
 		$start_minute = I('post.start_minute', '');
@@ -676,6 +678,11 @@ class IssueController extends GlobalController {
 			$end_time .= ':' . (($end_minute !== '') ? $end_minute : '00');
 			$end_time .= ':00';
 		}
+		if ($lat != '' && $lng != '') {
+			$data['lat'] = $lat;
+			$data['lng'] = $lng;
+		}
+		
 		
 		!empty($keywords) && $data['keywords'] = $keywords;
 		!empty($start_date) && $data['exm_start_date'] = $start_date;
