@@ -1,0 +1,94 @@
+<include file="Common/header" />
+		<div class="box">
+			<div class="content" style="width:1002px">
+			<form id="formSubmit" action="__CONTROLLER__/exportSummary" target="_blank" method="GET">
+				<table class="form2">
+					<tbody>
+					<tr>
+					  <td align="right" valign="top">区：</td>
+					  <td align="left">
+						<ul id="area_tree"></ul>
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right" valign="top">指标：</td>
+					  <td align="left">
+						<ul id="target_tree"></ul>
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right">检查日期：</td>
+					  <td align="left">
+					  <input type="text" size="16" id="filter_date_start" value="" name="filter_date_start" class="easyui-datebox"> 到 
+						<input type="text" size="16" id="filter_date_end" value="" name="filter_date_end" class="easyui-datebox">
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right">审核状态：</td>
+					  <td align="left">
+						<select id="sel_status_id" class="easyui-combobox" multiple="true" style="width:150px;">
+						<volist name="status_list" id="vo">
+							<option value="{$vo.status_id}">{$vo.name}</option>
+						</volist>
+						</select>
+					  </td>
+					</tr>
+					<tr>
+					  <td align="right"></td>
+					  <td align="left">
+						<input type="hidden" id="target" name="target" value="" />
+						<input type="hidden" id="area" name="area" value="" />
+						<input type="hidden" id="status_id" name="status_id" value="" />
+						<a id="btn_submit" class="button">导出</a>
+					  </td>
+					</tr>
+				  </tbody>
+				 </table>
+			</form>
+			</div>
+		</div>
+		<script type="text/javascript">
+			var city_id = "{$city_id}";
+			$(function() {
+				$("#btn_submit").click(function(){
+					setAreaAndTarget();
+					$("#formSubmit").submit();            
+				});
+				loadTree(city_id);
+			});
+			
+			function loadTree(city_id) {
+				$("#area_tree").tree({
+					url: ROOT + '/Area/getTree',
+					queryParams: {city_id: city_id, level: 2},
+					checkbox: true//,
+					//onlyLeafCheck: true
+				});
+				$("#target_tree").tree({
+					url: ROOT + '/Target/getTree',
+					queryParams: {city_id: city_id, level: 1},
+					checkbox: true//,
+					//onlyLeafCheck: true
+				});
+			}
+			
+			function setAreaAndTarget() {
+				$("#area").val(getTreeChecked("area_tree"));
+				$("#target").val(getTreeChecked("target_tree"));
+				$("#status_id").val($("#sel_status_id").combobox("getValues"));
+			}
+			
+			function getTreeChecked(tree_id) {
+				var tree_obj = $("#"+tree_id);
+				var nodes = tree_obj.tree("getChecked");
+				var val = "";
+				for(var i=0; i < nodes.length; i++) {
+					if (tree_obj.tree("isLeaf", nodes[i].target)) {
+						if (val == "") val = nodes[i].id;
+						else val += "," + nodes[i].id;
+					}
+				}
+				return val;
+			}
+		</script>
+<include file="Common/footer" />

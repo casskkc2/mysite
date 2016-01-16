@@ -1051,6 +1051,23 @@ class IssueController extends GlobalController {
 		$this->display();
 	}
 	
+	public function exportSmry() {
+		$IssueEvent = A('Issue', 'Event');
+		$status_list = M('IssueStatus')->select();
+		foreach($status_list as $key=>$row) {
+			//if ($this->user['user_type_id'] >= 20 && in_array($row['status_id'], array(1, 2))) {
+			if (in_array($row['status_id'], array(1, 2, 8, 12))) {
+				unset($status_list[$key]);
+				continue;
+			}
+			$status_list[$key]['name'] = $IssueEvent->getStatusName($row['status_id'], $this->user['user_type_id'], $row['name']);
+		}
+		$this->assign('status_list', $status_list);
+		
+		$this->assign('title', '导出汇总');
+		$this->assign('city_id', $this->city['city_id']);
+		$this->display('Issue/exportSummary');
+	}
 	public function exportSummary() {
 		set_time_limit(0);
 		
@@ -1058,15 +1075,30 @@ class IssueController extends GlobalController {
 		$start_date = I('get.filter_date_start', '');
 		$end_date = I('get.filter_date_end', '');
 		$root_target_ids = I('get.target', '');
-		$status = I('get.status', 0);
+		//$status = I('get.status', 0);
+		$status_ids = I('get.status_id', 0);
 		
 		if (empty($root_area_ids) || empty($root_target_ids)) {
 			$this->error('请选择区、指标'); exit;
 		}
 		
-		$arr = explode(',', $root_area_ids);
+		$arr = explode(',', $root_area_ids); // the 2nd level
+		$real_root_area_ids = array();
+		$filter_area_ids = array();
 		$AreaEvent = A('Area', 'Event');
-		$area_list = $AreaEvent->getAreaAndChildrenByIds($this->city['city_id'], $arr, $this->all_area_arr);
+		foreach($arr as $id) {
+			$parents = $AreaEvent->getParentsById($id);
+			$real_root_area_ids[] = $parents[0]['id'];
+			$filter_area_ids[] = $parents[0]['id'];
+			$filter_area_ids[] = $id;
+			
+			$children = $AreaEvent->getAreaList($this->city['city_id'], $id);
+			foreach($children as $child) {
+				$filter_area_ids[] = $child['id'];
+			}
+		}
+		//$area_list = $AreaEvent->getAreaAndChildrenByIds($this->city['city_id'], $arr, $this->all_area_arr);
+		$area_list = $AreaEvent->getAreaAndChildrenByIds($this->city['city_id'], $real_root_area_ids, $filter_area_ids);
 		//var_export($area_list);
 		$area_data = buildTree($area_list);
 		//var_export($area_data);exit;
@@ -1113,11 +1145,12 @@ class IssueController extends GlobalController {
 		!empty($end_date) && $examine_time_cond[]= array('elt', $end_date . ' 23:59:59');
 		!empty($start_date) && $examine_time_cond[]= array('egt', $start_date);
 		!empty($examine_time_cond) && $where['examine_time'] = $examine_time_cond;
+		!empty($status_ids) && $where['status_id']= array('in', explode(',', $status_ids));
 		
-		$IssueEvent = A('Issue', 'Event');
+		/*$IssueEvent = A('Issue', 'Event');
 		if(!empty($status)) {
 			$IssueEvent->statusToQueryCondition($status, $where);
-		}
+		}*/
 		
 		$data = array();
 		$list = M('Issue')

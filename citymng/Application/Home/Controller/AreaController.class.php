@@ -37,6 +37,7 @@ class AreaController extends GlobalController {
 		
 		$city_id = I('post.city_id', 430100);
 		$filter = I('post.filter', '');
+		$level = I('post.level', 0);
 		if (empty($city_id)) {
 			$this->ajaxReturn($res);
 		}
@@ -49,6 +50,11 @@ class AreaController extends GlobalController {
 				$list[$key]['status_text'] = '已删除';
 			}else {
 				$list[$key]['status_text'] = '正常';
+			}
+			
+			if ($level > 0) {
+				$arr = explode(',', trim($row['path'], ','));
+				if (count($arr) > $level) unset($list[$key]);
 			}
 		}
 		$res = buildTree($list, ',0,', array('sort', 'status_text', 'status'));
