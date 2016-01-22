@@ -4,11 +4,13 @@ use Think\Controller;
 class AreaController extends GlobalController {
 	function _initialize(){
 		parent::_initialize();
+		
+	}
+    public function index(){
 		if (!in_array($this->user['user_type_id'], array(10, 19))) {
 			$this->error('无权限访问');
 		}
-	}
-    public function index(){
+		
 		$AreaEvent = A('Area', 'Event');
 		
 		$provinces = $AreaEvent->getProvinceList();
@@ -120,6 +122,10 @@ class AreaController extends GlobalController {
 	}
 	
 	public function deleteNode() {
+		if (!in_array($this->user['user_type_id'], array(10, 19))) {
+			$this->error('无权限访问');
+		}
+		
 		$res = array('status'=>0, 'rcode'=>1, 'error'=>'');
 		
 		$id = I('post.id', 0);
@@ -147,6 +153,10 @@ class AreaController extends GlobalController {
 	}
 	
 	public function editNode() {
+		if (!in_array($this->user['user_type_id'], array(10, 19))) {
+			$this->error('无权限访问');
+		}
+		
 		$res = array('error'=>'', 'data'=>array());
 		$data = array();
 		
