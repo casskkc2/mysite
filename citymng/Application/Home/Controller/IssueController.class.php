@@ -43,6 +43,9 @@ class IssueController extends GlobalController {
 		}
 		$this->assign('user_list', $user_list);
 		
+		$show_smry_export = in_array($this->user['user_type_id'], array(10,11,12,19));
+		$this->assign('show_smry_export', $show_smry_export);
+		
 		$this->assign('title', '问题管理');
 		$this->assign('status', $status_id);
 		$this->assign('self_url', U('Issue/index', '', ''));
