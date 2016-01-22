@@ -1095,11 +1095,12 @@ class IssueController extends GlobalController {
 			$filter_area_ids[] = $parents[0]['id'];
 			$filter_area_ids[] = $id;
 			
-			$children = $AreaEvent->getAreaList($this->city['city_id'], $id);
+			$children = $AreaEvent->getAreaAndChildrenByIds($this->city['city_id'], array($id));
 			foreach($children as $child) {
 				$filter_area_ids[] = $child['id'];
 			}
 		}
+		//var_export($filter_area_ids);exit;
 		//$area_list = $AreaEvent->getAreaAndChildrenByIds($this->city['city_id'], $arr, $this->all_area_arr);
 		$area_list = $AreaEvent->getAreaAndChildrenByIds($this->city['city_id'], $real_root_area_ids, $filter_area_ids);
 		//var_export($area_list);
