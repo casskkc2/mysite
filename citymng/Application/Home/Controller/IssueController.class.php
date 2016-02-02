@@ -753,6 +753,12 @@ class IssueController extends GlobalController {
 		$operation_id = I('post.operation_id', 0);
 		$reply_text = I('post.reply_text', '');
 		
+		$has_file = I('post.has_file', 0);		
+		if ($has_file && empty($_FILES['attachment']['tmp_name'])) {
+			echo '<script>parent.alert("文件上传失败");</script>';
+			exit;
+		}
+		
 		$IssueEvent = A('Issue', 'Event');
 		$info = $IssueEvent->getIssueDetail($id);
 		if (empty($info)) {
