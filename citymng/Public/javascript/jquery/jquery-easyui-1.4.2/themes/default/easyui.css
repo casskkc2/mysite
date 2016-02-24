@@ -1288,7 +1288,7 @@
 .datagrid-body td,
 .datagrid-footer td {
   border-width: 0 1px 1px 0;
-  border-style: dotted;
+  border-style: solid;
   margin: 0;
   padding: 0;
 }
