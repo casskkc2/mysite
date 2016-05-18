@@ -43,7 +43,7 @@ class IssueController extends GlobalController {
 		}
 		$this->assign('user_list', $user_list);
 		
-		$show_smry_export = in_array($this->user['user_type_id'], array(10,11,12,19));
+		$show_smry_export = in_array($this->user['user_type_id'], array(10,11,12,19, 20));
 		$this->assign('show_smry_export', $show_smry_export);
 		
 		$this->assign('title', '问题管理');
